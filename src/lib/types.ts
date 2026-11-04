@@ -161,7 +161,7 @@ export interface AuditLog {
 
 export interface AdminNotification {
   id: string;
-  event_type: 'signup' | 'recharge' | 'withdrawal' | 'chat';
+  event_type: 'signup' | 'recharge' | 'withdrawal' | 'chat' | 'referral_bonus';
   title: string;
   message: string;
   entity_id: string | null;

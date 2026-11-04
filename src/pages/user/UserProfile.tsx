@@ -18,6 +18,7 @@ import {
   setActiveCurrency,
 } from '@/lib/types';
 import { StatusBadge } from '@/pages/user/UserDashboard';
+import ReferralEarnings from '@/components/ReferralEarnings';
 import { User, Mail, Phone, Camera, Key, CircleArrowDown as ArrowDownCircle, CircleArrowUp as ArrowUpCircle, Check, X, Gift, Copy, Wallet, Plus, Trash2, Star, Smartphone, Building2, Bitcoin, CircleAlert as AlertCircle, Loader as Loader2, Crown, Sparkles, Palette, Bell, Globe, Frame, Volume2, VolumeX, Coins } from 'lucide-react';
 
 const METHOD_ICONS: Record<WithdrawalMethod, React.ReactNode> = {
@@ -674,14 +675,16 @@ export default function UserProfile() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-400 font-bold">3.</span>
-                They invest in any car on the platform
+                When they recharge, you earn 0.5% bonus automatically
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-400 font-bold">4.</span>
-                You earn referral rewards as they grow
+                Bonuses are credited to your wallet in real time
               </li>
             </ul>
           </div>
+
+          <ReferralEarnings />
         </div>
       )}
 
