@@ -10,6 +10,16 @@ interface Conversation {
   unreadCount: number;
 }
 
+const QUICK_REPLIES = [
+  'Hello, how can I help you?',
+  'Please wait a moment',
+  'Your recharge is being processed',
+  'Please provide your account email',
+  'Your withdrawal is being reviewed',
+  'Thank you for your patience',
+  'Is there anything else I can help with?',
+];
+
 export default function AdminChat() {
   const { session } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -279,23 +289,36 @@ export default function AdminChat() {
                 })}
               </div>
 
-              {/* Input */}
-              <div className="p-3 border-t border-[#232a3f] flex items-center gap-2 bg-[#0a0e1a]/50">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                  className="flex-1 bg-[#131825] border border-[#232a3f] rounded-xl px-3.5 py-2.5 text-white text-sm focus:border-blue-500 outline-none transition-colors"
-                  placeholder={`Reply to ${activeUser.full_name}...`}
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={sending || !input.trim()}
-                  className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center text-white disabled:opacity-50 hover:opacity-90 transition-all flex-shrink-0 active:scale-90"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
+              {/* Quick reply chips + Input */}
+              <div className="p-3 border-t border-[#232a3f] bg-[#0a0e1a]/50 space-y-2">
+                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
+                  {QUICK_REPLIES.map((reply) => (
+                    <button
+                      key={reply}
+                      onClick={() => { setInput(reply); }}
+                      className="shrink-0 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/30 text-blue-300 text-xs font-medium hover:bg-blue-500/20 hover:border-blue-400/50 transition-all active:scale-95"
+                    >
+                      {reply}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                    className="flex-1 bg-[#131825] border border-[#232a3f] rounded-xl px-3.5 py-2.5 text-white text-sm focus:border-blue-500 outline-none transition-colors"
+                    placeholder={`Reply to ${activeUser.full_name}...`}
+                  />
+                  <button
+                    onClick={handleSend}
+                    disabled={sending || !input.trim()}
+                    className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center text-white disabled:opacity-50 hover:opacity-90 transition-all flex-shrink-0 active:scale-90"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           ) : (
