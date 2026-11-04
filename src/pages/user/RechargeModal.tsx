@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { PaymentMethod, formatCurrency } from '@/lib/types';
 import { useAuth } from '@/context/AuthContext';
-import { X, Upload, QrCode, Check, CircleAlert as AlertCircle } from 'lucide-react';
+import { X, Upload, Check, CircleAlert as AlertCircle } from 'lucide-react';
 
 export default function RechargeModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
   const { session } = useAuth();
@@ -26,14 +26,28 @@ export default function RechargeModal({ onClose, onSuccess }: { onClose: () => v
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !session) return;
-    setUploading(true);
     setError(null);
 
-    const ext = file.name.split('.').pop();
-    const fileName = `proofs/${session.user.id}/${Date.now()}.${ext}`;
-    const { error: upErr } = await supabase.storage.from('recharge-proofs').upload(fileName, file);
+    if (!file.type.startsWith('image/')) {
+      setError('Please upload an image of your payment receipt.');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Payment proof must be smaller than 5 MB.');
+      return;
+    }
+
+    setUploading(true);
+    const extension = file.type.split('/')[1] || 'jpg';
+    const fileName = `proofs/${session.user.id}/${Date.now()}.${extension}`;
+    const { error: upErr } = await supabase.storage.from('recharge-proofs').upload(fileName, file, {
+      contentType: file.type,
+      cacheControl: '3600',
+    });
     if (upErr) {
-      setError(upErr.message);
+      console.error('recharge proof upload failed', upErr);
+      setError('Could not upload the payment proof. Please try again.');
       setUploading(false);
       return;
     }
@@ -65,7 +79,8 @@ export default function RechargeModal({ onClose, onSuccess }: { onClose: () => v
     });
 
     if (insErr) {
-      setError(insErr.message);
+      console.error('recharge submission failed', insErr);
+      setError('Could not submit the recharge right now. Please try again.');
       setSubmitting(false);
       return;
     }
@@ -170,33 +185,40 @@ export default function RechargeModal({ onClose, onSuccess }: { onClose: () => v
         {/* Step 2: Payment method */}
         {step === 'payment' && (
           <div className="animate-fade-in">
-            <p className="text-sm text-gray-400 mb-3">Select a payment method:</p>
-            <div className="space-y-2 mb-5">
-              {methods.map((m) => (
-                <button
-                  key={m.id}
-                  onClick={() => setSelectedMethod(m)}
-                  className={`w-full flex items-center gap-3 p-3.5 rounded-xl border transition-all text-left ${
-                    selectedMethod?.id === m.id
-                      ? 'border-blue-500 bg-blue-500/5'
-                      : 'border-[#232a3f] bg-[#0a0e1a] hover:border-[#334155]'
-                  }`}
-                >
-                  <div className="w-10 h-10 bg-[#131825] rounded-lg flex items-center justify-center flex-shrink-0">
-                    <QrCode className="w-5 h-5 text-blue-400" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-white text-sm font-semibold">{m.method_name}</p>
-                    <p className="text-gray-500 text-xs truncate">{m.instructions?.slice(0, 50)}...</p>
-                  </div>
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                    selectedMethod?.id === m.id ? 'border-blue-500 bg-blue-500' : 'border-[#334155]'
-                  }`}>
-                    {selectedMethod?.id === m.id && <Check className="w-3 h-3 text-white" />}
-                  </div>
-                </button>
-              ))}
-            </div>
+            <p className="text-sm text-gray-400 mb-3">Choose where you sent the payment:</p>
+            {methods.length === 0 ? (
+              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-amber-300 text-sm mb-5">
+                Payment methods are temporarily unavailable. Please try again later.
+              </div>
+            ) : (
+              <div className="space-y-2 mb-5">
+                {methods.map((m) => {
+                  const isCrypto = m.method_name.toLowerCase().includes('crypto') || m.method_name.toLowerCase().includes('usdt');
+                  return (
+                    <button
+                      key={m.id}
+                      onClick={() => setSelectedMethod(m)}
+                      className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
+                        selectedMethod?.id === m.id
+                          ? 'border-blue-500 bg-blue-500/5'
+                          : 'border-[#232a3f] bg-[#0a0e1a] hover:border-[#334155]'
+                      }`}
+                    >
+                      <img src={m.qr_image_url} alt="" className="w-12 h-12 rounded-lg object-cover bg-white flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-sm font-semibold">{m.method_name}</p>
+                        <p className="text-gray-500 text-xs truncate">{isCrypto ? 'USDT · BNB, opBNB, ERC20, Base, WorldCoin' : 'GCash · Maya · Bank Transfer'}</p>
+                      </div>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                        selectedMethod?.id === m.id ? 'border-blue-500 bg-blue-500' : 'border-[#334155]'
+                      }`}>
+                        {selectedMethod?.id === m.id && <Check className="w-3 h-3 text-white" />}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
             <div className="flex gap-3">
               <button
                 onClick={() => setStep('amount')}
@@ -220,11 +242,14 @@ export default function RechargeModal({ onClose, onSuccess }: { onClose: () => v
           <div className="animate-fade-in">
             {/* QR code display */}
             <div className="bg-white rounded-xl p-4 text-center mb-4">
-              <img src={selectedMethod.qr_image_url} alt="Payment QR" className="w-48 h-48 mx-auto rounded-lg" />
+              <img src={selectedMethod.qr_image_url} alt={`${selectedMethod.method_name} payment QR code`} className="w-56 h-56 max-w-full mx-auto rounded-lg object-contain" />
               <p className="text-gray-700 text-sm font-semibold mt-3">{selectedMethod.method_name}</p>
-              <p className="text-gray-500 text-xs mt-1">{formatCurrency(parseFloat(amount))}</p>
+              <p className="text-gray-500 text-xs mt-1">Payment amount: {formatCurrency(parseFloat(amount))}</p>
             </div>
-            <p className="text-gray-400 text-xs mb-4 leading-relaxed">{selectedMethod.instructions}</p>
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl px-4 py-3 mb-4">
+              <p className="text-blue-300 text-xs font-semibold mb-1">Before you send</p>
+              <p className="text-gray-300 text-xs leading-relaxed">{selectedMethod.instructions}</p>
+            </div>
 
             {/* Reference number */}
             <label className="text-sm font-medium text-gray-300 mb-2 block">Transaction Reference Number</label>
@@ -237,7 +262,8 @@ export default function RechargeModal({ onClose, onSuccess }: { onClose: () => v
             />
 
             {/* Proof upload */}
-            <label className="text-sm font-medium text-gray-300 mb-2 block">Upload Payment Screenshot</label>
+            <label className="text-sm font-medium text-gray-300 mb-2 block">Upload Payment Screenshot <span className="text-red-400">*</span></label>
+            <p className="text-gray-500 text-xs mb-2">Use a clear screenshot showing the amount, recipient, and transaction reference. JPG, PNG, or WEBP up to 5 MB.</p>
             <div className="mb-4">
               {proofUrl ? (
                 <div className="relative rounded-xl overflow-hidden border border-emerald-500/30">
