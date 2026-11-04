@@ -96,7 +96,7 @@ export default function RechargeModal({ onClose, onSuccess }: { onClose: () => v
     setTimeout(onSuccess, 2000);
   }
 
-  const presetAmounts = [50, 100, 500, 1000, 5000];
+  const presetAmounts = [100, 500, 1000, 2500, 5000, 10000];
 
   if (success) {
     return (
@@ -169,16 +169,26 @@ export default function RechargeModal({ onClose, onSuccess }: { onClose: () => v
               max="100000"
               step="0.01"
             />
-            <div className="flex gap-2 mt-3">
-              {presetAmounts.map((amt) => (
-                <button
-                  key={amt}
-                  onClick={() => setAmount(String(amt))}
-                  className="flex-1 py-2 rounded-lg bg-[#0a0e1a] border border-[#232a3f] text-gray-300 text-sm font-medium hover:border-blue-500/40 hover:text-white transition-all"
-                >
-                  ₱{amt}
-                </button>
-              ))}
+            <div className="mt-3">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-gray-500">Quick select</p>
+              <div className="grid grid-cols-3 gap-2">
+                {presetAmounts.map((amt) => {
+                  const selected = amount === String(amt);
+                  return (
+                    <button
+                      key={amt}
+                      onClick={() => setAmount(String(amt))}
+                      className={`rounded-lg border py-2 text-sm font-semibold transition-all active:scale-95 ${
+                        selected
+                          ? 'border-blue-400 bg-blue-500/15 text-blue-200 shadow-lg shadow-blue-500/10'
+                          : 'border-[#232a3f] bg-[#0a0e1a] text-gray-400 hover:border-blue-500/40 hover:text-white'
+                      }`}
+                    >
+                      ₱{amt.toLocaleString()}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
             <button
               onClick={() => setStep('payment')}
