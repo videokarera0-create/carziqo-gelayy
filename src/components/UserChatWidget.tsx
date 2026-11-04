@@ -127,7 +127,7 @@ export default function UserChatWidget() {
     <>
       {/* Toast notification (when chat is closed) */}
       {toast && !open && (
-        <div className="fixed bottom-36 right-5 z-50 w-[calc(100vw-2.5rem)] max-w-sm bg-[#131825] border border-blue-500/30 rounded-2xl shadow-2xl shadow-black/40 p-3.5 animate-slide-up">
+        <div className="fixed bottom-[5.5rem] right-3 z-[60] w-[calc(100vw-1.5rem)] max-w-sm bg-[#131825] border border-blue-500/30 rounded-2xl shadow-2xl shadow-black/40 p-3.5 animate-slide-up">
           <div className="flex items-start gap-3">
             <div className="w-9 h-9 rounded-lg bg-blue-500/15 flex items-center justify-center flex-shrink-0">
               <MessageCircle className="w-5 h-5 text-blue-400" />
@@ -149,7 +149,7 @@ export default function UserChatWidget() {
       {!open && (
         <button
           onClick={openChat}
-          className="fixed bottom-20 right-5 z-40 w-14 h-14 gradient-primary rounded-full flex items-center justify-center shadow-xl shadow-blue-500/30 hover:scale-105 transition-all active:scale-95"
+          className="fixed bottom-20 right-5 z-[55] w-14 h-14 gradient-primary rounded-full flex items-center justify-center shadow-xl shadow-blue-500/30 hover:scale-105 transition-all active:scale-95"
         >
           <MessageCircle className="w-6 h-6 text-white" />
           {unread > 0 && (
@@ -161,7 +161,7 @@ export default function UserChatWidget() {
       )}
 
       {open && (
-        <div className="fixed bottom-20 right-5 z-40 w-[calc(100vw-2.5rem)] max-w-sm bg-[#131825] rounded-2xl border border-[#232a3f] shadow-2xl flex flex-col animate-slide-up" style={{ maxHeight: '70vh' }}>
+        <div className="fixed bottom-[5.5rem] right-3 z-[60] w-[calc(100vw-1.5rem)] max-w-sm bg-[#131825] rounded-2xl border border-[#232a3f] shadow-2xl flex flex-col animate-slide-up" style={{ maxHeight: '75vh' }}>
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-[#232a3f]">
             <div className="flex items-center gap-2.5">
@@ -222,8 +222,9 @@ export default function UserChatWidget() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-              className="flex-1 bg-[#0a0e1a] border border-[#232a3f] rounded-xl px-3.5 py-2.5 text-white text-sm focus:border-blue-500 outline-none"
+              className="flex-1 bg-[#0a0e1a] border border-[#232a3f] rounded-xl px-3.5 py-2.5 text-white text-sm focus:border-blue-500 outline-none transition-colors"
               placeholder="Type a message..."
+              autoFocus
             />
             <button
               onClick={handleSend}

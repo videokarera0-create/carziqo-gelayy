@@ -1,24 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import LiveBackground from '@/components/LiveBackground';
 import FleetTicker from '@/components/FleetTicker';
+import { useAccentColor } from '@/lib/useAccentColor';
 import { Eye, EyeOff, TrendingUp, Shield, Wallet, Gift, Info, Download, Car, Cpu, Leaf, Globe, Users } from 'lucide-react';
-
-const ACCENT_COLORS = [
-  '#22d3ee', // cyan
-  '#34d399', // emerald
-  '#fbbf24', // amber
-  '#fb7185', // rose
-  '#60a5fa', // blue
-  '#a78bfa', // violet
-  '#f472b6', // pink
-  '#2dd4bf', // teal
-];
-
-function pickRandomColor(exclude?: string): string {
-  const pool = ACCENT_COLORS.filter((c) => c !== exclude);
-  return pool[Math.floor(Math.random() * pool.length)];
-}
 
 export default function AuthPage({ onShowAbout }: { onShowAbout: () => void }) {
   const { signIn, signUp } = useAuth();
@@ -31,20 +16,7 @@ export default function AuthPage({ onShowAbout }: { onShowAbout: () => void }) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [accentColor, setAccentColor] = useState(() => pickRandomColor());
-
-  // Rotate accent color every 60 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setAccentColor((prev) => pickRandomColor(prev));
-    }, 60000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Dynamic gradient based on current accent color
-  const gradientStyle = useMemo(() => ({
-    background: `linear-gradient(135deg, ${accentColor}15, transparent 60%)`,
-  }), [accentColor]);
+  const accentColor = useAccentColor();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

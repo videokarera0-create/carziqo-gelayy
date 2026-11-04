@@ -10,6 +10,7 @@ import AdminUsers from '@/pages/admin/AdminUsers';
 import AdminRoutes from '@/pages/admin/AdminRoutes';
 import AdminChat from '@/pages/admin/AdminChat';
 import { supabase } from '@/lib/supabase';
+import { useAccentColor } from '@/lib/useAccentColor';
 
 type AdminTab = 'dashboard' | 'recharges' | 'withdrawals' | 'cars' | 'routes' | 'users' | 'chat';
 
@@ -18,6 +19,7 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
   const [tab, setTab] = useState<AdminTab>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatUnread, setChatUnread] = useState(0);
+  const accent = useAccentColor();
 
   useEffect(() => {
     async function loadUnread() {
@@ -58,9 +60,10 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
     <div className="min-h-screen flex">
       {/* Sidebar */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 z-50 h-screen w-64 glass-strong border-r border-[#232a3f]/80 transition-transform duration-300 ${
+        className={`fixed lg:sticky top-0 left-0 z-50 h-screen w-64 glass-strong border-r transition-transform duration-300 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
+        style={{ borderColor: `${accent}30` }}
       >
         <div className="p-5 border-b border-[#232a3f]/80">
           <div className="flex items-center gap-3">
@@ -80,11 +83,8 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
                 setTab(item.id);
                 setSidebarOpen(false);
               }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                tab === item.id
-                  ? 'gradient-primary text-white shadow-lg shadow-blue-500/20'
-                  : 'text-gray-400 hover:text-white hover:bg-[#1a2033]'
-              }`}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
+              style={tab === item.id ? { background: `linear-gradient(135deg, ${accent}, ${accent}cc)`, color: '#fff', boxShadow: `0 4px 12px ${accent}40` } : undefined}
             >
               {item.icon}
               {item.label}

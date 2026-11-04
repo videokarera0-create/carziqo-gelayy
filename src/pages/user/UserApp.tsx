@@ -8,12 +8,14 @@ import UserProfile from '@/pages/user/UserProfile';
 import Rewards from '@/pages/user/Rewards';
 import RechargeHistory from '@/pages/user/RechargeHistory';
 import UserChatWidget from '@/components/UserChatWidget';
+import { useAccentColor } from '@/lib/useAccentColor';
 
 type Tab = 'home' | 'store' | 'rentals' | 'history' | 'rewards' | 'profile';
 
 export default function UserApp({ onShowAbout }: { onShowAbout: () => void }) {
   const { profile, signOut } = useAuth();
   const [tab, setTab] = useState<Tab>('home');
+  const accent = useAccentColor();
 
   const navItems: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: 'home', label: 'Home', icon: <Home className="w-5 h-5" /> },
@@ -27,10 +29,10 @@ export default function UserApp({ onShowAbout }: { onShowAbout: () => void }) {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Top bar */}
-      <header className="glass-strong sticky top-0 z-40 border-b border-[#232a3f]/80">
+      <header className="glass-strong sticky top-0 z-40 border-b" style={{ borderColor: `${accent}40` }}>
         <div className="max-w-2xl mx-auto px-5 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <img src="/assets/images/waymo-removebg-preview.png" alt="WAYMO" className="w-9 h-9 rounded-lg object-contain bg-white p-1 shadow-lg shadow-blue-500/10" />
+            <img src="/assets/images/waymo-removebg-preview.png" alt="WAYMO" className="w-9 h-9 rounded-lg object-contain bg-white p-1 shadow-lg" style={{ boxShadow: `0 4px 12px ${accent}30` }} />
             <div>
               <h1 className="font-bold text-white text-sm text-gradient-shine">WAYMO</h1>
               <p className="text-[10px] text-gray-400">Welcome, {profile?.full_name || 'User'}</p>
@@ -80,11 +82,10 @@ export default function UserApp({ onShowAbout }: { onShowAbout: () => void }) {
             <button
               key={item.id}
               onClick={() => setTab(item.id)}
-              className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg transition-all ${
-                tab === item.id ? 'text-blue-400' : 'text-gray-500 hover:text-gray-300'
-              }`}
+              className="flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg transition-all"
+              style={tab === item.id ? { color: accent } : undefined}
             >
-              <div className={`p-1.5 rounded-lg transition-all ${tab === item.id ? 'bg-blue-500/15 shadow-lg shadow-blue-500/10' : ''}`}>
+              <div className="p-1.5 rounded-lg transition-all" style={tab === item.id ? { background: `${accent}20`, boxShadow: `0 2px 8px ${accent}20` } : undefined}>
                 {item.icon}
               </div>
               <span className="text-[10px] font-medium">{item.label}</span>
