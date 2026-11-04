@@ -196,6 +196,3 @@ function makeBucket(label: string, records: RechargeRecord[]): AnalyticsBucket {
 function MetricCard({ icon, label, value, color, bg, onClick }: { icon: React.ReactNode; label: string; value: string; color: string; bg: string; onClick?: () => void }) {
   return <div onClick={onClick} className={`bg-[#131825] rounded-xl p-5 border border-[#232a3f] ${onClick ? 'cursor-pointer hover:border-blue-500/40 transition-all' : ''}`}><div className={`w-12 h-12 ${bg} rounded-xl flex items-center justify-center ${color} mb-3`}>{icon}</div><p className="text-gray-400 text-xs mb-1">{label}</p><p className="text-white text-2xl font-bold">{value}</p></div>;
 }
-
-
-export default AdminDashboard

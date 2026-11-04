@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { PaymentMethod, formatCurrency } from '@/lib/types';
 import { useAuth } from '@/context/AuthContext';
@@ -16,6 +16,7 @@ export default function RechargeModal({ onClose, onSuccess }: { onClose: () => v
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const amountInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     supabase.from('payment_methods').select('*').eq('is_active', true).then(({ data }) => {
@@ -160,6 +161,7 @@ export default function RechargeModal({ onClose, onSuccess }: { onClose: () => v
           <div className="animate-fade-in">
             <label className="text-sm font-medium text-gray-300 mb-2 block">Enter Amount (₱)</label>
             <input
+              ref={amountInputRef}
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
@@ -188,6 +190,19 @@ export default function RechargeModal({ onClose, onSuccess }: { onClose: () => v
                     </button>
                   );
                 })}
+                <button
+                  onClick={() => {
+                    setAmount('');
+                    amountInputRef.current?.focus();
+                  }}
+                  className={`rounded-lg border py-2 text-sm font-semibold transition-all active:scale-95 ${
+                    !presetAmounts.some((a) => amount === String(a)) && amount
+                      ? 'border-blue-400 bg-blue-500/15 text-blue-200 shadow-lg shadow-blue-500/10'
+                      : 'border-[#232a3f] bg-[#0a0e1a] text-gray-400 hover:border-blue-500/40 hover:text-white'
+                  }`}
+                >
+                  Custom
+                </button>
               </div>
             </div>
             <button

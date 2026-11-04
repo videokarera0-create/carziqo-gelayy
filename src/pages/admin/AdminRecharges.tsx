@@ -10,6 +10,7 @@ export default function AdminRecharges() {
   const [actioning, setActioning] = useState<string | null>(null);
   const [filter, setFilter] = useState<'pending' | 'approved' | 'rejected' | 'all'>('pending');
   const [selected, setSelected] = useState<RechargeLog | null>(null);
+  const [zoom, setZoom] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
@@ -192,12 +193,43 @@ export default function AdminRecharges() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <img src={selected.proof_image_url!} alt="Payment proof" className="w-full rounded-lg" />
+            <img
+              src={selected.proof_image_url!}
+              alt="Payment proof"
+              onClick={() => setZoom(selected.proof_image_url!)}
+              className="w-full rounded-lg cursor-zoom-in transition-transform hover:opacity-90"
+            />
+            <button
+              onClick={() => setZoom(selected.proof_image_url!)}
+              className="mt-2 w-full flex items-center justify-center gap-2 text-blue-400 text-xs hover:text-blue-300 py-1.5"
+            >
+              <FileImage className="w-3.5 h-3.5" /> Click image to zoom
+            </button>
             <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
               <InfoRow label="Amount" value={formatCurrency(Number(selected.amount))} />
               <InfoRow label="Reference" value={selected.reference_number || 'N/A'} />
             </div>
           </div>
+        </div>
+      )}
+      {/* Zoom modal */}
+      {zoom && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setZoom(null)}
+        >
+          <button
+            onClick={() => setZoom(null)}
+            className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <img
+            src={zoom}
+            alt="Payment proof zoomed"
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-full max-h-[90vh] object-contain rounded-lg"
+          />
         </div>
       )}
     </div>
