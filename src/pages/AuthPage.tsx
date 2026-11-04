@@ -1,7 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import LiveBackground from '@/components/LiveBackground';
+import FleetTicker from '@/components/FleetTicker';
 import { Eye, EyeOff, TrendingUp, Shield, Wallet, Gift, Info, Download, Car, Cpu, Leaf, Globe, Users } from 'lucide-react';
+
+const ACCENT_COLORS = [
+  '#22d3ee', // cyan
+  '#34d399', // emerald
+  '#fbbf24', // amber
+  '#fb7185', // rose
+  '#60a5fa', // blue
+  '#a78bfa', // violet
+  '#f472b6', // pink
+  '#2dd4bf', // teal
+];
+
+function pickRandomColor(exclude?: string): string {
+  const pool = ACCENT_COLORS.filter((c) => c !== exclude);
+  return pool[Math.floor(Math.random() * pool.length)];
+}
 
 export default function AuthPage({ onShowAbout }: { onShowAbout: () => void }) {
   const { signIn, signUp } = useAuth();
@@ -14,6 +31,20 @@ export default function AuthPage({ onShowAbout }: { onShowAbout: () => void }) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [accentColor, setAccentColor] = useState(() => pickRandomColor());
+
+  // Rotate accent color every 60 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAccentColor((prev) => pickRandomColor(prev));
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Dynamic gradient based on current accent color
+  const gradientStyle = useMemo(() => ({
+    background: `linear-gradient(135deg, ${accentColor}15, transparent 60%)`,
+  }), [accentColor]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -50,7 +81,7 @@ export default function AuthPage({ onShowAbout }: { onShowAbout: () => void }) {
         <div className="absolute inset-0 gradient-primary opacity-90" />
         <div className="absolute inset-0 opacity-15">
           <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl animate-pulse-slow" />
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-cyan-300 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
+          <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s', backgroundColor: `${accentColor}40` }} />
           <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-blue-200 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '4s' }} />
         </div>
         <div className="absolute inset-0 opacity-10" style={{
@@ -77,11 +108,16 @@ export default function AuthPage({ onShowAbout }: { onShowAbout: () => void }) {
             WAYMO is united by the belief that autonomous driving technology can make a meaningful difference — transforming lives through safer, more sustainable, and more accessible transportation for all.
           </p>
 
+          {/* Live fleet ticker */}
+          <div className="mb-8">
+            <FleetTicker accentColor={accentColor} />
+          </div>
+
           {/* Stats row */}
           <div className="grid grid-cols-3 gap-3 mb-8">
-            <StatCard value="10+" label="Years of Innovation" />
-            <StatCard value="24/7" label="Autonomous Fleet" />
-            <StatCard value="100%" label="Electric Vehicles" />
+            <StatCard value="10+" label="Years of Innovation" accentColor={accentColor} />
+            <StatCard value="24/7" label="Autonomous Fleet" accentColor={accentColor} />
+            <StatCard value="100%" label="Electric Vehicles" accentColor={accentColor} />
           </div>
 
           {/* Features */}
@@ -95,29 +131,29 @@ export default function AuthPage({ onShowAbout }: { onShowAbout: () => void }) {
           </div>
 
           {/* Mission quote */}
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/15 mb-8">
+          <div className="backdrop-blur-md rounded-2xl p-5 border mb-8" style={{ background: `${accentColor}12`, borderColor: `${accentColor}30` }}>
             <p className="text-white text-sm italic leading-relaxed mb-3">
               "We are doing more than just navigating roads — we are building the systems that interact with the world around us."
             </p>
-            <p className="text-cyan-200 text-xs font-semibold">— Vincent Vanhoucke, Distinguished Engineer</p>
+            <p className="text-xs font-semibold" style={{ color: accentColor }}>— Vincent Vanhoucke, Distinguished Engineer</p>
           </div>
 
           {/* How it works mini-section */}
-          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 mb-8">
+          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border mb-8" style={{ borderColor: `${accentColor}20` }}>
             <h3 className="text-white font-semibold text-sm mb-3 flex items-center gap-2">
-              <Car className="w-4 h-4 text-cyan-300" /> How WAYMO Works
+              <Car className="w-4 h-4" style={{ color: accentColor }} /> How WAYMO Works
             </h3>
             <div className="space-y-2.5">
-              <StepRow num="1" text="Choose a premium car from our fleet" />
-              <StepRow num="2" text="Invest with flexible 30 or 60 day plans" />
-              <StepRow num="3" text="Earn daily returns straight to your wallet" />
-              <StepRow num="4" text="Withdraw anytime — verified and secure" />
+              <StepRow num="1" text="Choose a premium car from our fleet" accentColor={accentColor} />
+              <StepRow num="2" text="Invest with flexible 30 or 60 day plans" accentColor={accentColor} />
+              <StepRow num="3" text="Earn daily returns straight to your wallet" accentColor={accentColor} />
+              <StepRow num="4" text="Withdraw anytime — verified and secure" accentColor={accentColor} />
             </div>
           </div>
 
           {/* Community */}
           <div className="flex items-center gap-3 text-blue-100 text-sm">
-            <Users className="w-5 h-5 text-cyan-200 flex-shrink-0" />
+            <Users className="w-5 h-5 flex-shrink-0" style={{ color: accentColor }} />
             <span>Join a growing community of investors shaping the future of mobility.</span>
           </div>
         </div>
@@ -308,19 +344,19 @@ function FeatureRow({ icon, title, desc }: { icon: React.ReactNode; title: strin
   );
 }
 
-function StatCard({ value, label }: { value: string; label: string }) {
+function StatCard({ value, label, accentColor }: { value: string; label: string; accentColor: string }) {
   return (
-    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/10">
+    <div className="backdrop-blur-sm rounded-xl p-3 text-center border" style={{ background: `${accentColor}12`, borderColor: `${accentColor}25` }}>
       <p className="text-2xl font-bold text-white">{value}</p>
       <p className="text-blue-100 text-[10px] mt-1 leading-tight">{label}</p>
     </div>
   );
 }
 
-function StepRow({ num, text }: { num: string; text: string }) {
+function StepRow({ num, text, accentColor }: { num: string; text: string; accentColor: string }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="w-6 h-6 rounded-full bg-cyan-400/20 text-cyan-200 text-xs font-bold flex items-center justify-center flex-shrink-0">{num}</span>
+      <span className="w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center flex-shrink-0" style={{ background: `${accentColor}25`, color: accentColor }}>{num}</span>
       <span className="text-blue-100 text-sm">{text}</span>
     </div>
   );
