@@ -4,6 +4,7 @@ import AboutPage from '@/pages/AboutPage';
 import UserApp from '@/pages/user/UserApp';
 import AdminApp from '@/pages/admin/AdminApp';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import LiveBackground from '@/components/LiveBackground';
 import { useState } from 'react';
 
 function AppContent() {
@@ -11,7 +12,14 @@ function AppContent() {
   const [showAbout, setShowAbout] = useState(false);
 
   if (showAbout) {
-    return <AboutPage onBack={() => setShowAbout(false)} />;
+    return (
+      <>
+        <LiveBackground />
+        <div className="relative z-10">
+          <AboutPage onBack={() => setShowAbout(false)} />
+        </div>
+      </>
+    );
   }
 
   if (loading) {
@@ -27,10 +35,24 @@ function AppContent() {
   }
 
   if (profile.role === 'admin') {
-    return <AdminApp onShowAbout={() => setShowAbout(true)} />;
+    return (
+      <>
+        <LiveBackground />
+        <div className="relative z-10">
+          <AdminApp onShowAbout={() => setShowAbout(true)} />
+        </div>
+      </>
+    );
   }
 
-  return <UserApp onShowAbout={() => setShowAbout(true)} />;
+  return (
+    <>
+      <LiveBackground />
+      <div className="relative z-10">
+        <UserApp onShowAbout={() => setShowAbout(true)} />
+      </div>
+    </>
+  );
 }
 
 export default function App() {

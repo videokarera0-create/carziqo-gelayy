@@ -55,18 +55,18 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0e1a] flex">
+    <div className="min-h-screen flex">
       {/* Sidebar */}
       <aside
-        className={`fixed lg:sticky top-0 left-0 z-50 h-screen w-64 bg-[#131825] border-r border-[#232a3f] transition-transform duration-300 ${
+        className={`fixed lg:sticky top-0 left-0 z-50 h-screen w-64 glass-strong border-r border-[#232a3f]/80 transition-transform duration-300 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
-        <div className="p-5 border-b border-[#232a3f]">
+        <div className="p-5 border-b border-[#232a3f]/80">
           <div className="flex items-center gap-3">
-            <img src="/assets/images/waymo-removebg-preview.png" alt="WAYMO" className="w-10 h-10 rounded-lg object-contain bg-white p-1" />
+            <img src="/assets/images/waymo-removebg-preview.png" alt="WAYMO" className="w-10 h-10 rounded-lg object-contain bg-white p-1 shadow-lg shadow-blue-500/10" />
             <div>
-              <h1 className="font-bold text-white text-sm">WAYMO Admin</h1>
+              <h1 className="font-bold text-white text-sm text-gradient-shine">WAYMO Admin</h1>
               <p className="text-[10px] text-gray-400">Wallet Operations</p>
             </div>
           </div>
@@ -97,7 +97,7 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
           ))}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-[#232a3f] space-y-1">
+        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-[#232a3f]/80 space-y-1">
           <button
             onClick={onShowAbout}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all"
@@ -123,7 +123,7 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
       {/* Main content */}
       <div className="flex-1 min-w-0">
         {/* Mobile header */}
-        <header className="lg:hidden glass sticky top-0 z-30 border-b border-[#232a3f] px-4 py-3 flex items-center justify-between">
+        <header className="lg:hidden glass-strong sticky top-0 z-30 border-b border-[#232a3f]/80 px-4 py-3 flex items-center justify-between">
           <button onClick={() => setSidebarOpen(true)} className="text-gray-400 hover:text-white">
             <Menu className="w-6 h-6" />
           </button>

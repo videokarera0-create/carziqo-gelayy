@@ -42,9 +42,9 @@ export default function UserDashboard() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Balance card */}
-      <div className="relative overflow-hidden rounded-2xl gradient-primary p-6 text-white shadow-xl shadow-blue-500/20">
-        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 right-8 w-24 h-24 bg-cyan-300/10 rounded-full translate-y-1/2" />
+      <div className="relative overflow-hidden rounded-2xl gradient-primary p-6 text-white shadow-xl shadow-blue-500/20 animate-glow">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 animate-pulse-slow" />
+        <div className="absolute bottom-0 right-8 w-24 h-24 bg-cyan-300/10 rounded-full translate-y-1/2 animate-pulse-slow" style={{ animationDelay: '2s' }} />
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-1">
             <Wallet className="w-4 h-4 text-blue-100" />
@@ -70,7 +70,7 @@ export default function UserDashboard() {
         </div>
       </div>
 
-      <div className="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-4">
+      <div className="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-4 backdrop-blur-sm">
         <p className="text-blue-400 font-semibold text-sm">Withdrawals available</p>
         <p className="text-gray-400 text-xs mt-1">Minimum withdrawal is ₱500.00</p>
       </div>
@@ -114,7 +114,7 @@ export default function UserDashboard() {
           {cars.map((car) => (
             <div
               key={car.id}
-              className="flex-shrink-0 w-44 rounded-xl overflow-hidden bg-[#131825] border border-[#232a3f]"
+              className="flex-shrink-0 w-44 rounded-xl overflow-hidden bg-[#131825]/80 backdrop-blur-xl border border-[#232a3f] card-hover"
             >
               <img src={car.image_url} alt={car.car_name} className="w-full h-24 object-cover" />
               <div className="p-3">
@@ -188,7 +188,7 @@ export default function UserDashboard() {
 
 function StatCard({ icon, label, value, color, bg }: { icon: React.ReactNode; label: string; value: string; color: string; bg: string }) {
   return (
-    <div className="bg-[#131825] rounded-xl p-4 border border-[#232a3f]">
+    <div className="bg-[#131825]/80 backdrop-blur-xl rounded-xl p-4 border border-[#232a3f] card-hover">
       <div className={`w-9 h-9 ${bg} rounded-lg flex items-center justify-center ${color} mb-2`}>
         {icon}
       </div>
@@ -201,7 +201,7 @@ function StatCard({ icon, label, value, color, bg }: { icon: React.ReactNode; la
 function InvestmentMiniCard({ inv }: { inv: Investment }) {
   const progress = Math.min((inv.days_completed / inv.duration_days) * 100, 100);
   return (
-    <div className="bg-[#131825] rounded-xl p-3 border border-[#232a3f] flex items-center gap-3">
+    <div className="bg-[#131825]/80 backdrop-blur-xl rounded-xl p-3 border border-[#232a3f] flex items-center gap-3 card-hover">
       <img src={inv.car_image_url} alt={inv.car_name} className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1">
@@ -223,7 +223,7 @@ function InvestmentMiniCard({ inv }: { inv: Investment }) {
 function TransactionRow({ type, amount, status, date }: { type: 'recharge' | 'withdrawal'; amount: number; status: string; date: string }) {
   const isRecharge = type === 'recharge';
   return (
-    <div className="flex items-center justify-between bg-[#131825] rounded-lg px-4 py-3 border border-[#232a3f]">
+    <div className="flex items-center justify-between bg-[#131825]/80 backdrop-blur-xl rounded-lg px-4 py-3 border border-[#232a3f] card-hover">
       <div className="flex items-center gap-3">
         <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
           isRecharge ? 'bg-emerald-500/10 text-emerald-400' : 'bg-orange-500/10 text-orange-400'

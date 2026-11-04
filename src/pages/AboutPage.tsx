@@ -32,9 +32,9 @@ export default function AboutPage({ onBack }: { onBack: () => void }) {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0a0e1a]">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="glass sticky top-0 z-40 border-b border-[#232a3f]">
+      <header className="glass-strong sticky top-0 z-40 border-b border-[#232a3f]/80">
         <div className="max-w-3xl mx-auto px-5 py-3 flex items-center gap-3">
           <button
             onClick={onBack}
@@ -52,10 +52,10 @@ export default function AboutPage({ onBack }: { onBack: () => void }) {
 
       <main className="max-w-3xl mx-auto px-5 py-6 pb-32">
         {/* Hero section */}
-        <div className="relative overflow-hidden rounded-2xl gradient-primary p-8 mb-6">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-white rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-300 rounded-full blur-3xl" />
+        <div className="relative overflow-hidden rounded-2xl gradient-primary p-8 mb-6 animate-glow">
+          <div className="absolute inset-0 opacity-15">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-white rounded-full blur-3xl animate-pulse-slow" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-300 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
           </div>
           <div className="relative z-10">
             <h2 className="text-3xl font-bold text-white mb-3 leading-tight">
@@ -117,7 +117,7 @@ export default function AboutPage({ onBack }: { onBack: () => void }) {
         </div>
 
         {/* How it works */}
-        <div className="bg-[#131825] rounded-2xl border border-[#232a3f] p-6 mb-8">
+        <div className="bg-[#131825]/80 backdrop-blur-xl rounded-2xl border border-[#232a3f] p-6 mb-8">
           <h3 className="text-white font-bold text-lg mb-5">How It Works</h3>
           <div className="space-y-5">
             <StepCard
@@ -144,7 +144,7 @@ export default function AboutPage({ onBack }: { onBack: () => void }) {
         </div>
 
         {/* Download App */}
-        <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-2xl p-6 mb-8">
+        <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-2xl p-6 mb-8 backdrop-blur-sm">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
               <Download className="w-5 h-5 text-blue-400" />
@@ -196,7 +196,7 @@ export default function AboutPage({ onBack }: { onBack: () => void }) {
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-[#131825] rounded-xl border border-[#232a3f] p-5 animate-pulse">
+              <div key={i} className="bg-[#131825]/80 backdrop-blur-xl rounded-xl border border-[#232a3f] p-5 animate-pulse">
                 <div className="h-4 bg-[#232a3f] rounded w-20 mb-3" />
                 <div className="h-5 bg-[#232a3f] rounded w-3/4 mb-2" />
                 <div className="h-3 bg-[#232a3f] rounded w-full mb-1" />
@@ -205,7 +205,7 @@ export default function AboutPage({ onBack }: { onBack: () => void }) {
             ))}
           </div>
         ) : news.length === 0 ? (
-          <div className="bg-[#131825] rounded-xl border border-[#232a3f] p-8 text-center">
+          <div className="bg-[#131825]/80 backdrop-blur-xl rounded-xl border border-[#232a3f] p-8 text-center">
             <Megaphone className="w-8 h-8 text-gray-600 mx-auto mb-2" />
             <p className="text-gray-500 text-sm">No news yet. Check back soon for updates.</p>
           </div>
@@ -216,7 +216,7 @@ export default function AboutPage({ onBack }: { onBack: () => void }) {
               return (
                 <article
                   key={article.id}
-                  className="bg-[#131825] rounded-xl border border-[#232a3f] p-5 hover:border-[#3a4258] transition-all"
+                  className="bg-[#131825]/80 backdrop-blur-xl rounded-xl border border-[#232a3f] p-5 hover:border-blue-500/30 transition-all card-hover"
                 >
                   <div className="flex items-center gap-2 mb-3">
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${cat.color}`}>
@@ -235,7 +235,7 @@ export default function AboutPage({ onBack }: { onBack: () => void }) {
         )}
 
         {/* Contact / Support */}
-        <div className="mt-8 bg-[#131825] rounded-2xl border border-[#232a3f] p-6 text-center">
+        <div className="mt-8 bg-[#131825]/80 backdrop-blur-xl rounded-2xl border border-[#232a3f] p-6 text-center">
           <h3 className="text-white font-bold text-sm mb-2">Need Help?</h3>
           <p className="text-gray-400 text-xs mb-4">
             Our support team is available 24/7 through live chat. Tap the chat icon in the bottom right corner to start a conversation.
@@ -251,7 +251,7 @@ export default function AboutPage({ onBack }: { onBack: () => void }) {
 
 function StatCard({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
   return (
-    <div className="bg-[#131825] rounded-xl border border-[#232a3f] p-4 text-center">
+    <div className="bg-[#131825]/80 backdrop-blur-xl rounded-xl border border-[#232a3f] p-4 text-center card-hover">
       <div className="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 mx-auto mb-2">
         {icon}
       </div>
@@ -263,7 +263,7 @@ function StatCard({ icon, value, label }: { icon: React.ReactNode; value: string
 
 function FeatureCard({ icon, title, desc, color }: { icon: React.ReactNode; title: string; desc: string; color: string }) {
   return (
-    <div className={`bg-gradient-to-br ${color} rounded-xl border p-5`}>
+    <div className={`bg-gradient-to-br ${color} rounded-xl border p-5 card-hover`}>
       <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center text-white mb-3">
         {icon}
       </div>

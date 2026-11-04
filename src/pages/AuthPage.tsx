@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import LiveBackground from '@/components/LiveBackground';
 import { Eye, EyeOff, TrendingUp, Shield, Wallet, Gift, Info, Download } from 'lucide-react';
 
 export default function AuthPage({ onShowAbout }: { onShowAbout: () => void }) {
@@ -41,18 +42,30 @@ export default function AuthPage({ onShowAbout }: { onShowAbout: () => void }) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+    <div className="min-h-screen flex flex-col lg:flex-row relative">
+      <LiveBackground />
+
       {/* Left side - branding */}
-      <div className="lg:w-1/2 gradient-primary relative overflow-hidden flex items-center justify-center p-8 lg:p-16">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-cyan-300 rounded-full blur-3xl" />
+      <div className="lg:w-1/2 relative overflow-hidden flex items-center justify-center p-8 lg:p-16 z-10">
+        <div className="absolute inset-0 gradient-primary opacity-90" />
+        <div className="absolute inset-0 opacity-15">
+          <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl animate-pulse-slow" />
+          <div className="absolute bottom-10 right-10 w-96 h-96 bg-cyan-300 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
+          <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-blue-200 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '4s' }} />
         </div>
+        <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: 'linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px)',
+          backgroundSize: '50px 50px',
+          maskImage: 'radial-gradient(ellipse 70% 60% at 50% 40%, black 0%, transparent 80%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 70% 60% at 50% 40%, black 0%, transparent 80%)',
+        }} />
         <div className="relative z-10 max-w-md text-white">
           <div className="flex items-center gap-3 mb-12">
-            <img src="/assets/images/waymo-removebg-preview.png" alt="WAYMO" className="w-12 h-12 rounded-xl object-cover bg-white p-1" />
+            <div className="w-12 h-12 rounded-xl bg-white/95 p-1 shadow-xl">
+              <img src="/assets/images/waymo-removebg-preview.png" alt="WAYMO" className="w-full h-full object-contain" />
+            </div>
             <div>
-              <h1 className="text-2xl font-bold">WAYMO</h1>
+              <h1 className="text-2xl font-bold text-gradient-shine">WAYMO</h1>
               <p className="text-blue-100 text-sm">Car Rental Earning Platform</p>
             </div>
           </div>
@@ -73,9 +86,9 @@ export default function AuthPage({ onShowAbout }: { onShowAbout: () => void }) {
       </div>
 
       {/* Right side - auth form */}
-      <div className="lg:w-1/2 flex items-center justify-center p-8 bg-[#0a0e1a]">
+      <div className="lg:w-1/2 flex items-center justify-center p-8 bg-transparent relative z-10">
         <div className="w-full max-w-md animate-slide-up">
-          <div className="mb-8">
+          <div className="mb-8 text-center lg:text-left">
             <h2 className="text-2xl font-bold text-white mb-2">
               {mode === 'login' ? 'Welcome back' : 'Create your account'}
             </h2>
@@ -86,11 +99,11 @@ export default function AuthPage({ onShowAbout }: { onShowAbout: () => void }) {
             </p>
           </div>
 
-          <div className="flex gap-2 mb-6 p-1 bg-[#131825] rounded-xl">
+          <div className="flex gap-2 mb-6 p-1 bg-[#131825]/80 backdrop-blur-xl rounded-xl border border-[#232a3f]">
             <button
               onClick={() => setMode('login')}
               className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                mode === 'login' ? 'gradient-primary text-white' : 'text-gray-400 hover:text-white'
+                mode === 'login' ? 'gradient-primary text-white shadow-lg shadow-blue-500/20' : 'text-gray-400 hover:text-white'
               }`}
             >
               Sign In
@@ -98,7 +111,7 @@ export default function AuthPage({ onShowAbout }: { onShowAbout: () => void }) {
             <button
               onClick={() => setMode('register')}
               className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                mode === 'register' ? 'gradient-primary text-white' : 'text-gray-400 hover:text-white'
+                mode === 'register' ? 'gradient-primary text-white shadow-lg shadow-blue-500/20' : 'text-gray-400 hover:text-white'
               }`}
             >
               Register
@@ -181,7 +194,7 @@ export default function AuthPage({ onShowAbout }: { onShowAbout: () => void }) {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full gradient-primary text-white font-semibold py-3.5 rounded-xl transition-all hover:opacity-90 disabled:opacity-50 hover:shadow-lg hover:shadow-blue-500/25"
+              className="w-full gradient-primary text-white font-semibold py-3.5 rounded-xl transition-all hover:opacity-90 disabled:opacity-50 hover:shadow-lg hover:shadow-blue-500/25 btn-glow"
             >
               {submitting ? 'Please wait...' : mode === 'login' ? 'Sign In' : 'Create Account'}
             </button>
@@ -212,17 +225,19 @@ export default function AuthPage({ onShowAbout }: { onShowAbout: () => void }) {
       <style>{`
         .input-field {
           width: 100%;
-          background: #131825;
+          background: rgba(19, 24, 37, 0.8);
+          backdrop-filter: blur(12px);
           border: 1px solid #232a3f;
           border-radius: 0.75rem;
           padding: 0.875rem 1rem;
           color: white;
           font-size: 0.95rem;
           outline: none;
-          transition: border-color 0.2s;
+          transition: all 0.2s;
         }
         .input-field:focus {
           border-color: #0066ff;
+          box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
         }
         .input-field::placeholder {
           color: #4b5563;
@@ -243,8 +258,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function FeatureRow({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
-    <div className="flex items-start gap-4">
-      <div className="w-10 h-10 bg-white/15 rounded-lg flex items-center justify-center flex-shrink-0 backdrop-blur-sm">
+    <div className="flex items-start gap-4 group">
+      <div className="w-10 h-10 bg-white/15 rounded-lg flex items-center justify-center flex-shrink-0 backdrop-blur-sm transition-all group-hover:bg-white/25 group-hover:scale-110">
         {icon}
       </div>
       <div>
