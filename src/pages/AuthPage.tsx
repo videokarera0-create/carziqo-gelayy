@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import LiveBackground from '@/components/LiveBackground';
 import FleetTicker from '@/components/FleetTicker';
