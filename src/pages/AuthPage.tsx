@@ -50,9 +50,9 @@ export default function AuthPage({ onShowAbout }: { onShowAbout: () => void }) {
         </div>
         <div className="relative z-10 max-w-md text-white">
           <div className="flex items-center gap-3 mb-12">
-            <img src="/carziqo.webp" alt="Carziqo.Ltd" className="w-12 h-12 rounded-xl object-cover bg-white" />
+            <img src="/assets/images/waymo-removebg-preview.png" alt="WAYMO" className="w-12 h-12 rounded-xl object-cover bg-white p-1" />
             <div>
-              <h1 className="text-2xl font-bold">Carziqo.Ltd</h1>
+              <h1 className="text-2xl font-bold">WAYMO</h1>
               <p className="text-blue-100 text-sm">Car Rental Earning Platform</p>
             </div>
           </div>
@@ -192,7 +192,7 @@ export default function AuthPage({ onShowAbout }: { onShowAbout: () => void }) {
           </p>
 
           <a
-            href="https://www.mediafire.com/file/1vac1njb7wlktl9/Carziqo.apk/file"
+            href="#"
             target="_blank"
             rel="noopener noreferrer"
             className="w-full mt-6 flex items-center justify-center gap-2 gradient-accent text-white font-semibold py-3.5 rounded-xl transition-all hover:opacity-90 hover:shadow-lg hover:shadow-emerald-500/25"
@@ -204,7 +204,7 @@ export default function AuthPage({ onShowAbout }: { onShowAbout: () => void }) {
             onClick={onShowAbout}
             className="w-full mt-4 flex items-center justify-center gap-2 text-gray-400 text-sm hover:text-blue-400 transition-colors"
           >
-            <Info className="w-4 h-4" /> About Carziqo.Ltd
+            <Info className="w-4 h-4" /> About WAYMO
           </button>
         </div>
       </div>

@@ -160,7 +160,7 @@ export default function AboutPage({ onBack }: { onBack: () => void }) {
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <a
-              href="https://www.mediafire.com/file/1vac1njb7wlktl9/Carziqo.apk/file"
+              href="#"
               target="_blank"
               rel="noopener noreferrer"
               className="flex-1 flex items-center justify-center gap-3 bg-[#0a0e1a] hover:bg-[#131825] border border-[#232a3f] hover:border-blue-500/50 rounded-xl py-3.5 px-4 transition-all group"
@@ -173,7 +173,7 @@ export default function AboutPage({ onBack }: { onBack: () => void }) {
               <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-blue-400 ml-auto transition-colors" />
             </a>
             <a
-              href="https://www.mediafire.com/file/1vac1njb7wlktl9/Carziqo.apk/file"
+              href="#"
               target="_blank"
               rel="noopener noreferrer"
               className="flex-1 flex items-center justify-center gap-3 bg-[#0a0e1a] hover:bg-[#131825] border border-[#232a3f] hover:border-blue-500/50 rounded-xl py-3.5 px-4 transition-all group"
@@ -241,7 +241,7 @@ export default function AboutPage({ onBack }: { onBack: () => void }) {
             Our support team is available 24/7 through live chat. Tap the chat icon in the bottom right corner to start a conversation.
           </p>
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500/10 text-blue-400 text-xs font-medium">
-            <Sparkles className="w-3.5 h-3.5" /> Powered by Carziqo Live Chat
+            <Sparkles className="w-3.5 h-3.5" /> Powered by WAYMO Live Chat
           </div>
         </div>
       </main>

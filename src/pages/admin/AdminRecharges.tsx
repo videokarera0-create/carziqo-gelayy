@@ -11,6 +11,8 @@ export default function AdminRecharges() {
   const [filter, setFilter] = useState<'pending' | 'approved' | 'rejected' | 'all'>('pending');
   const [selected, setSelected] = useState<RechargeLog | null>(null);
   const [zoom, setZoom] = useState<string | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<RechargeLog | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
@@ -51,10 +53,11 @@ export default function AdminRecharges() {
     setActioning(null);
   }
 
-  async function handleReject(id: string) {
-    setActioning(id);
-    const note = window.prompt('Optional rejection note') || 'Rejected by admin';
-    const { error } = await supabase.rpc('reject_recharge', { p_recharge_id: id, p_note: note });
+  async function handleReject() {
+    if (!rejectTarget) return;
+    setActioning(rejectTarget.id);
+    const note = rejectReason.trim() || 'Rejected by admin';
+    const { error } = await supabase.rpc('reject_recharge', { p_recharge_id: rejectTarget.id, p_note: note });
     if (error) {
       console.error('recharge rejection failed', error);
       setNotice('Could not reject this recharge. It may already have been reviewed.');
@@ -62,6 +65,8 @@ export default function AdminRecharges() {
       await loadRecharges();
     }
     setActioning(null);
+    setRejectTarget(null);
+    setRejectReason('');
   }
 
   const filters = ['pending', 'approved', 'rejected', 'all'] as const;
@@ -160,7 +165,7 @@ export default function AdminRecharges() {
                         <Check className="w-4 h-4" /> Approve
                       </button>
                       <button
-                        onClick={() => handleReject(r.id)}
+                        onClick={() => setRejectTarget(r)}
                         disabled={actioning === r.id}
                         className="flex-1 flex items-center justify-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 font-semibold py-2.5 rounded-lg hover:bg-red-500/20 transition-all disabled:opacity-50"
                       >
@@ -230,6 +235,50 @@ export default function AdminRecharges() {
             onClick={(e) => e.stopPropagation()}
             className="max-w-full max-h-[90vh] object-contain rounded-lg"
           />
+        </div>
+      )}
+
+      {/* Rejection reason modal */}
+      {rejectTarget && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => { setRejectTarget(null); setRejectReason(''); }}
+        >
+          <div className="bg-[#131825] rounded-2xl border border-[#232a3f] p-5 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-white font-semibold">Decline Recharge</h3>
+              <button onClick={() => { setRejectTarget(null); setRejectReason(''); }} className="text-gray-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-gray-400 text-sm mb-3">
+              Add a short reason the user will see on their wallet screen for this {formatCurrency(Number(rejectTarget.amount))} request.
+            </p>
+            <textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              rows={3}
+              maxLength={200}
+              className="w-full bg-[#0a0e1a] border border-[#232a3f] rounded-xl px-4 py-3 text-white text-sm focus:border-blue-500 outline-none resize-none"
+              placeholder="e.g. Receipt is blurry — please re-upload a clear screenshot"
+            />
+            <p className="text-right text-gray-600 text-[10px] mt-1">{rejectReason.length}/200</p>
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={() => { setRejectTarget(null); setRejectReason(''); }}
+                className="px-5 py-3 rounded-xl bg-[#0a0e1a] border border-[#232a3f] text-gray-400 font-medium hover:text-white transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReject}
+                disabled={actioning === rejectTarget.id}
+                className="flex-1 flex items-center justify-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 font-semibold py-3 rounded-xl hover:bg-red-500/20 transition-all disabled:opacity-50"
+              >
+                {actioning === rejectTarget.id ? 'Declining...' : 'Decline Recharge'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

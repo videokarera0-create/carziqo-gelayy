@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import AdminNotifications from '@/components/AdminNotifications';
-import { LayoutDashboard, Car, CircleArrowDown as ArrowDownCircle, CircleArrowUp as ArrowUpCircle, Users, LogOut, Menu, X, Info, Route } from 'lucide-react';
+import { LayoutDashboard, Car, CircleArrowDown as ArrowDownCircle, CircleArrowUp as ArrowUpCircle, Users, LogOut, Menu, X, Info, Route, MessageCircle } from 'lucide-react';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminRecharges from '@/pages/admin/AdminRecharges';
 import AdminWithdrawals from '@/pages/admin/AdminWithdrawals';
 import AdminCars from '@/pages/admin/AdminCars';
 import AdminUsers from '@/pages/admin/AdminUsers';
 import AdminRoutes from '@/pages/admin/AdminRoutes';
+import AdminChat from '@/pages/admin/AdminChat';
 
-type AdminTab = 'dashboard' | 'recharges' | 'withdrawals' | 'cars' | 'routes' | 'users';
+type AdminTab = 'dashboard' | 'recharges' | 'withdrawals' | 'cars' | 'routes' | 'users' | 'chat';
 
 export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
   const { signOut } = useAuth();
@@ -23,6 +24,7 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
     { id: 'cars', label: 'Car Management', icon: <Car className="w-5 h-5" /> },
     { id: 'routes', label: 'Fleet Routes', icon: <Route className="w-5 h-5" /> },
     { id: 'users', label: 'User Logs', icon: <Users className="w-5 h-5" /> },
+    { id: 'chat', label: 'Live Chat', icon: <MessageCircle className="w-5 h-5" /> },
   ];
 
   return (
@@ -107,6 +109,7 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
           {tab === 'cars' && <AdminCars />}
           {tab === 'routes' && <AdminRoutes />}
           {tab === 'users' && <AdminUsers />}
+          {tab === 'chat' && <AdminChat />}
         </main>
       </div>
     </div>

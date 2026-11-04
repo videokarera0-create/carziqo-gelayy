@@ -132,7 +132,15 @@ export default function RechargeHistory() {
                   ) : <span className="text-gray-600">No proof attached</span>}
                   {record.reviewed_at && <span className="text-gray-500">Reviewed {formatDate(record.reviewed_at)}</span>}
                 </div>
-                {record.admin_note && <p className="mt-3 rounded-lg border border-red-500/15 bg-red-500/5 px-3 py-2 text-xs text-gray-400">Review note: {record.admin_note}</p>}
+                {record.admin_note && record.status === 'rejected' && (
+                  <div className="mt-3 rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2.5">
+                    <p className="text-[10px] uppercase tracking-wider text-red-400 font-semibold mb-0.5">Decline reason</p>
+                    <p className="text-xs text-gray-300">{record.admin_note}</p>
+                  </div>
+                )}
+                {record.admin_note && record.status !== 'rejected' && (
+                  <p className="mt-3 rounded-lg border border-red-500/15 bg-red-500/5 px-3 py-2 text-xs text-gray-400">Review note: {record.admin_note}</p>
+                )}
               </article>
             );
           })}

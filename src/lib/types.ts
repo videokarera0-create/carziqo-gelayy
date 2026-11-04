@@ -170,6 +170,16 @@ export interface AdminNotification {
   created_at: string;
 }
 
+export interface ChatMessage {
+  id: string;
+  user_id: string;
+  sender_id: string;
+  sender_role: 'user' | 'admin';
+  content: string;
+  is_read: boolean;
+  created_at: string;
+}
+
 export interface DailyCheckin {
   id: string;
   user_id: string;

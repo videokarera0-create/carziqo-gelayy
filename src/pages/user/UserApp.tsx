@@ -1,5 +1,5 @@
 import { useAuth } from '@/context/AuthContext';
-import { Car, Chrome as Home, Briefcase, User, LogOut, Gift, Leaf, Info, History } from 'lucide-react';
+import { Car, Chrome as Home, Briefcase, User, LogOut, Gift, Leaf, Info, History, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import UserDashboard from '@/pages/user/UserDashboard';
 import CarStore from '@/pages/user/CarStore';
@@ -7,6 +7,7 @@ import MyRentals from '@/pages/user/MyRentals';
 import UserProfile from '@/pages/user/UserProfile';
 import Rewards from '@/pages/user/Rewards';
 import RechargeHistory from '@/pages/user/RechargeHistory';
+import UserChatWidget from '@/components/UserChatWidget';
 
 type Tab = 'home' | 'store' | 'rentals' | 'history' | 'rewards' | 'profile';
 
@@ -69,6 +70,8 @@ export default function UserApp({ onShowAbout }: { onShowAbout: () => void }) {
         {tab === 'rewards' && <Rewards />}
         {tab === 'profile' && <UserProfile />}
       </main>
+
+      <UserChatWidget />
 
       {/* Bottom nav */}
       <nav className="glass fixed bottom-0 left-0 right-0 border-t border-[#232a3f] z-40">
