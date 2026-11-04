@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Bell, CheckCheck, Volume2, VolumeX, X, UserPlus, CircleArrowDown as ArrowDownCircle, CircleArrowUp as ArrowUpCircle } from 'lucide-react';
+import { Bell, CheckCheck, Volume2, VolumeX, X, UserPlus, CircleArrowDown as ArrowDownCircle, CircleArrowUp as ArrowUpCircle, MessageCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { AdminNotification } from '@/lib/types';
 
@@ -7,6 +7,7 @@ const EVENT_STYLES = {
   signup: { icon: UserPlus, color: 'text-blue-400 bg-blue-500/10' },
   recharge: { icon: ArrowDownCircle, color: 'text-emerald-400 bg-emerald-500/10' },
   withdrawal: { icon: ArrowUpCircle, color: 'text-amber-400 bg-amber-500/10' },
+  chat: { icon: MessageCircle, color: 'text-cyan-400 bg-cyan-500/10' },
 } as const;
 
 export default function AdminNotifications() {

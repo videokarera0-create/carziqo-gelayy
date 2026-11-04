@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import AdminNotifications from '@/components/AdminNotifications';
 import { LayoutDashboard, Car, CircleArrowDown as ArrowDownCircle, CircleArrowUp as ArrowUpCircle, Users, LogOut, Menu, X, Info, Route, MessageCircle } from 'lucide-react';
@@ -9,6 +9,7 @@ import AdminCars from '@/pages/admin/AdminCars';
 import AdminUsers from '@/pages/admin/AdminUsers';
 import AdminRoutes from '@/pages/admin/AdminRoutes';
 import AdminChat from '@/pages/admin/AdminChat';
+import { supabase } from '@/lib/supabase';
 
 type AdminTab = 'dashboard' | 'recharges' | 'withdrawals' | 'cars' | 'routes' | 'users' | 'chat';
 
@@ -16,15 +17,41 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
   const { signOut } = useAuth();
   const [tab, setTab] = useState<AdminTab>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [chatUnread, setChatUnread] = useState(0);
 
-  const navItems: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
+  useEffect(() => {
+    async function loadUnread() {
+      const { count } = await supabase
+        .from('chat_messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('sender_role', 'user')
+        .eq('is_read', false);
+      setChatUnread(count || 0);
+    }
+    loadUnread();
+
+    const channel = supabase
+      .channel('admin-chat-badge')
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'chat_messages' },
+        () => loadUnread()
+      )
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'chat_messages' },
+        () => loadUnread()
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  const navItems: { id: AdminTab; label: string; icon: React.ReactNode; badge?: number }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
     { id: 'recharges', label: 'Recharge Approvals', icon: <ArrowDownCircle className="w-5 h-5" /> },
     { id: 'withdrawals', label: 'Withdrawal Approvals', icon: <ArrowUpCircle className="w-5 h-5" /> },
     { id: 'cars', label: 'Car Management', icon: <Car className="w-5 h-5" /> },
     { id: 'routes', label: 'Fleet Routes', icon: <Route className="w-5 h-5" /> },
     { id: 'users', label: 'User Logs', icon: <Users className="w-5 h-5" /> },
-    { id: 'chat', label: 'Live Chat', icon: <MessageCircle className="w-5 h-5" /> },
+    { id: 'chat', label: 'Live Chat', icon: <MessageCircle className="w-5 h-5" />, badge: chatUnread },
   ];
 
   return (
@@ -61,6 +88,11 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
             >
               {item.icon}
               {item.label}
+              {!!item.badge && item.badge > 0 && (
+                <span className="ml-auto min-w-5 h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                  {item.badge > 9 ? '9+' : item.badge}
+                </span>
+              )}
             </button>
           ))}
         </nav>
