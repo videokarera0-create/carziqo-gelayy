@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import LiveBackground from '@/components/LiveBackground';
-import { Eye, EyeOff, TrendingUp, Shield, Wallet, Gift, Info, Download } from 'lucide-react';
+import { Eye, EyeOff, TrendingUp, Shield, Wallet, Gift, Info, Download, Car, Cpu, Leaf, Globe, Users } from 'lucide-react';
 
 export default function AuthPage({ onShowAbout }: { onShowAbout: () => void }) {
   const { signIn, signUp } = useAuth();
@@ -59,8 +59,8 @@ export default function AuthPage({ onShowAbout }: { onShowAbout: () => void }) {
           maskImage: 'radial-gradient(ellipse 70% 60% at 50% 40%, black 0%, transparent 80%)',
           WebkitMaskImage: 'radial-gradient(ellipse 70% 60% at 50% 40%, black 0%, transparent 80%)',
         }} />
-        <div className="relative z-10 max-w-md text-white">
-          <div className="flex items-center gap-3 mb-12">
+        <div className="relative z-10 max-w-md text-white overflow-y-auto max-h-[calc(100vh-4rem)] scrollbar-thin pr-2">
+          <div className="flex items-center gap-3 mb-8">
             <div className="w-12 h-12 rounded-xl bg-white/95 p-1 shadow-xl">
               <img src="/assets/images/waymo-removebg-preview.png" alt="WAYMO" className="w-full h-full object-contain" />
             </div>
@@ -70,17 +70,55 @@ export default function AuthPage({ onShowAbout }: { onShowAbout: () => void }) {
             </div>
           </div>
 
-          <h2 className="text-4xl font-bold mb-4 leading-tight">
-            Invest in premium cars. <span className="text-cyan-200">Earn daily returns.</span>
+          <h2 className="text-3xl font-bold mb-3 leading-tight">
+            The world's most trusted driver.
           </h2>
-          <p className="text-blue-100 text-lg mb-12 leading-relaxed">
-            Rent luxury vehicles, earn daily profits over 30 or 60 day holding periods.
+          <p className="text-blue-100 text-base mb-8 leading-relaxed">
+            WAYMO is united by the belief that autonomous driving technology can make a meaningful difference — transforming lives through safer, more sustainable, and more accessible transportation for all.
           </p>
 
-          <div className="space-y-5">
-            <FeatureRow icon={<TrendingUp className="w-5 h-5" />} title="Up to 5% daily returns" desc="Competitive rates on premium car rentals" />
-            <FeatureRow icon={<Wallet className="w-5 h-5" />} title="Flexible withdrawal" desc="Cash out your earnings anytime" />
-            <FeatureRow icon={<Shield className="w-5 h-5" />} title="Secure transactions" desc="Admin-verified payments and payouts" />
+          {/* Stats row */}
+          <div className="grid grid-cols-3 gap-3 mb-8">
+            <StatCard value="10+" label="Years of Innovation" />
+            <StatCard value="24/7" label="Autonomous Fleet" />
+            <StatCard value="100%" label="Electric Vehicles" />
+          </div>
+
+          {/* Features */}
+          <div className="space-y-4 mb-8">
+            <FeatureRow icon={<TrendingUp className="w-5 h-5" />} title="Up to 3% daily returns" desc="Competitive rates on premium car rentals" />
+            <FeatureRow icon={<Cpu className="w-5 h-5" />} title="The Waymo Driver" desc="Fully autonomous technology with integrated sensors and real-time compute" />
+            <FeatureRow icon={<Shield className="w-5 h-5" />} title="Safety first culture" desc="Advancing safely is our core value — robust standards on every ride" />
+            <FeatureRow icon={<Wallet className="w-5 h-5" />} title="Flexible withdrawal" desc="Cash out your earnings anytime with admin-verified payouts" />
+            <FeatureRow icon={<Leaf className="w-5 h-5" />} title="Sustainable mobility" desc="All-electric fleet reducing carbon emissions on every trip" />
+            <FeatureRow icon={<Globe className="w-5 h-5" />} title="Global expansion" desc="Now operating across multiple cities and countries worldwide" />
+          </div>
+
+          {/* Mission quote */}
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/15 mb-8">
+            <p className="text-white text-sm italic leading-relaxed mb-3">
+              "We are doing more than just navigating roads — we are building the systems that interact with the world around us."
+            </p>
+            <p className="text-cyan-200 text-xs font-semibold">— Vincent Vanhoucke, Distinguished Engineer</p>
+          </div>
+
+          {/* How it works mini-section */}
+          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 mb-8">
+            <h3 className="text-white font-semibold text-sm mb-3 flex items-center gap-2">
+              <Car className="w-4 h-4 text-cyan-300" /> How WAYMO Works
+            </h3>
+            <div className="space-y-2.5">
+              <StepRow num="1" text="Choose a premium car from our fleet" />
+              <StepRow num="2" text="Invest with flexible 30 or 60 day plans" />
+              <StepRow num="3" text="Earn daily returns straight to your wallet" />
+              <StepRow num="4" text="Withdraw anytime — verified and secure" />
+            </div>
+          </div>
+
+          {/* Community */}
+          <div className="flex items-center gap-3 text-blue-100 text-sm">
+            <Users className="w-5 h-5 text-cyan-200 flex-shrink-0" />
+            <span>Join a growing community of investors shaping the future of mobility.</span>
           </div>
         </div>
       </div>
@@ -266,6 +304,24 @@ function FeatureRow({ icon, title, desc }: { icon: React.ReactNode; title: strin
         <h3 className="font-semibold text-white">{title}</h3>
         <p className="text-blue-100 text-sm">{desc}</p>
       </div>
+    </div>
+  );
+}
+
+function StatCard({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/10">
+      <p className="text-2xl font-bold text-white">{value}</p>
+      <p className="text-blue-100 text-[10px] mt-1 leading-tight">{label}</p>
+    </div>
+  );
+}
+
+function StepRow({ num, text }: { num: string; text: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="w-6 h-6 rounded-full bg-cyan-400/20 text-cyan-200 text-xs font-bold flex items-center justify-center flex-shrink-0">{num}</span>
+      <span className="text-blue-100 text-sm">{text}</span>
     </div>
   );
 }
