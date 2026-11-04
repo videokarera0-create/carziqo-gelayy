@@ -42,9 +42,9 @@ export default function AboutPage({ onBack }: { onBack: () => void }) {
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <img src="/carziqo.webp" alt="Carziqo.Ltd" className="w-9 h-9 rounded-lg object-cover bg-white" />
+          <img src="/assets/images/waymo-removebg-preview.png" alt="WAYMO" className="w-9 h-9 rounded-lg object-contain bg-white p-1" />
           <div>
-            <h1 className="font-bold text-white text-sm">About Carziqo.Ltd</h1>
+            <h1 className="font-bold text-white text-sm">About WAYMO</h1>
             <p className="text-[10px] text-gray-400">News & Information</p>
           </div>
         </div>
@@ -59,7 +59,7 @@ export default function AboutPage({ onBack }: { onBack: () => void }) {
           </div>
           <div className="relative z-10">
             <h2 className="text-3xl font-bold text-white mb-3 leading-tight">
-              Carziqo.Ltd
+              WAYMO
             </h2>
             <p className="text-blue-100 text-base leading-relaxed mb-4">
               A premier car rental earning platform where users invest in luxury vehicles
@@ -88,7 +88,7 @@ export default function AboutPage({ onBack }: { onBack: () => void }) {
         </div>
 
         {/* Features */}
-        <h3 className="text-white font-bold text-lg mb-4">Why Choose Carziqo</h3>
+        <h3 className="text-white font-bold text-lg mb-4">Why Choose WAYMO</h3>
         <div className="grid sm:grid-cols-2 gap-3 mb-8">
           <FeatureCard
             icon={<TrendingUp className="w-5 h-5" />}
@@ -155,7 +155,7 @@ export default function AboutPage({ onBack }: { onBack: () => void }) {
             </div>
           </div>
           <p className="text-gray-400 text-sm mb-5 leading-relaxed">
-            Download the Carziqo.Ltd app for the best experience with push notifications,
+            Download the WAYMO app for the best experience with push notifications,
             faster loading, and exclusive mobile-only promotions.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">

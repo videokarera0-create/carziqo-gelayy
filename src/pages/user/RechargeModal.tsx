@@ -115,10 +115,18 @@ export default function RechargeModal({ onClose, onSuccess }: { onClose: () => v
   return (
     <Overlay onClose={onClose}>
       <div className="animate-slide-up">
-        <div className="flex items-center justify-between mb-5">
-          <h3 className="text-lg font-bold text-white">Recharge Wallet</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
-            <X className="w-5 h-5" />
+        <div className="mb-5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-white p-1.5 shadow-lg shadow-blue-500/10">
+              <img src="/assets/images/waymo-removebg-preview.png" alt="WAYMO" className="h-8 w-8 object-contain" />
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-blue-300">WAYMO Wallet</p>
+              <h3 className="text-lg font-bold text-white">Recharge securely</h3>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-gray-400 transition-colors hover:text-white">
+            <X className="h-5 w-5" />
           </button>
         </div>
 

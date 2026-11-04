@@ -10,6 +10,7 @@ export default function AdminRecharges() {
   const [actioning, setActioning] = useState<string | null>(null);
   const [filter, setFilter] = useState<'pending' | 'approved' | 'rejected' | 'all'>('pending');
   const [selected, setSelected] = useState<RechargeLog | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
     loadRecharges();
@@ -19,7 +20,11 @@ export default function AdminRecharges() {
     setLoading(true);
     let query = supabase.from('recharge_logs').select('*').order('created_at', { ascending: false });
     if (filter !== 'all') query = query.eq('status', filter);
-    const { data } = await query;
+    const { data, error } = await query;
+    if (error) {
+      console.error('admin recharge load failed', error);
+      setNotice('Could not load recharge requests. Please try again.');
+    }
     const rechargesData = (data as unknown as RechargeLog[]) || [];
     setRecharges(rechargesData);
 
@@ -37,7 +42,8 @@ export default function AdminRecharges() {
     setActioning(id);
     const { error } = await supabase.rpc('approve_recharge', { p_recharge_id: id });
     if (error) {
-      alert(error.message);
+      console.error('recharge approval failed', error);
+      setNotice('Could not approve this recharge. It may already have been reviewed.');
     } else {
       await loadRecharges();
     }
@@ -46,9 +52,11 @@ export default function AdminRecharges() {
 
   async function handleReject(id: string) {
     setActioning(id);
-    const { error } = await supabase.rpc('reject_recharge', { p_recharge_id: id, p_note: 'Rejected by admin' });
+    const note = window.prompt('Optional rejection note') || 'Rejected by admin';
+    const { error } = await supabase.rpc('reject_recharge', { p_recharge_id: id, p_note: note });
     if (error) {
-      alert(error.message);
+      console.error('recharge rejection failed', error);
+      setNotice('Could not reject this recharge. It may already have been reviewed.');
     } else {
       await loadRecharges();
     }
@@ -59,10 +67,24 @@ export default function AdminRecharges() {
 
   return (
     <div className="animate-fade-in space-y-5">
-      <div>
-        <h2 className="text-2xl font-bold text-white mb-1">Recharge Approvals</h2>
-        <p className="text-gray-400 text-sm">Review and approve user deposit requests</p>
+      <div className="relative overflow-hidden rounded-2xl border border-blue-400/20 bg-gradient-to-br from-blue-600/20 via-[#131825] to-emerald-500/10 p-6">
+        <div className="absolute -right-10 -top-12 h-36 w-36 rounded-full bg-blue-400/10 blur-2xl" />
+        <div className="relative flex items-center gap-3">
+          <img src="/assets/images/waymo-removebg-preview.png" alt="WAYMO" className="h-12 w-12 rounded-xl bg-white p-1.5 object-contain" />
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-blue-300">WAYMO Operations</p>
+            <h2 className="text-2xl font-bold text-white">Recharge approvals</h2>
+            <p className="mt-1 text-sm text-gray-400">Verify receipts before wallet credit is released.</p>
+          </div>
+        </div>
       </div>
+
+      {notice && (
+        <div className="flex items-center justify-between rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+          <span>{notice}</span>
+          <button onClick={() => setNotice(null)} className="text-amber-200 hover:text-white">Dismiss</button>
+        </div>
+      )}
 
       {/* Filter */}
       <div className="flex gap-2 p-1 bg-[#131825] rounded-xl w-fit">

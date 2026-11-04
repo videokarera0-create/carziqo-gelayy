@@ -1,13 +1,14 @@
 import { useAuth } from '@/context/AuthContext';
-import { Car, Chrome as Home, Briefcase, User, LogOut, Gift, Leaf, Info } from 'lucide-react';
+import { Car, Chrome as Home, Briefcase, User, LogOut, Gift, Leaf, Info, History } from 'lucide-react';
 import { useState } from 'react';
 import UserDashboard from '@/pages/user/UserDashboard';
 import CarStore from '@/pages/user/CarStore';
 import MyRentals from '@/pages/user/MyRentals';
 import UserProfile from '@/pages/user/UserProfile';
 import Rewards from '@/pages/user/Rewards';
+import RechargeHistory from '@/pages/user/RechargeHistory';
 
-type Tab = 'home' | 'store' | 'rentals' | 'rewards' | 'profile';
+type Tab = 'home' | 'store' | 'rentals' | 'history' | 'rewards' | 'profile';
 
 export default function UserApp({ onShowAbout }: { onShowAbout: () => void }) {
   const { profile, signOut } = useAuth();
@@ -17,6 +18,7 @@ export default function UserApp({ onShowAbout }: { onShowAbout: () => void }) {
     { id: 'home', label: 'Home', icon: <Home className="w-5 h-5" /> },
     { id: 'store', label: 'Car Store', icon: <Car className="w-5 h-5" /> },
     { id: 'rentals', label: 'Rentals', icon: <Briefcase className="w-5 h-5" /> },
+    { id: 'history', label: 'History', icon: <History className="w-5 h-5" /> },
     { id: 'rewards', label: 'Rewards', icon: <Gift className="w-5 h-5" /> },
     { id: 'profile', label: 'Profile', icon: <User className="w-5 h-5" /> },
   ];
@@ -27,9 +29,9 @@ export default function UserApp({ onShowAbout }: { onShowAbout: () => void }) {
       <header className="glass sticky top-0 z-40 border-b border-[#232a3f]">
         <div className="max-w-2xl mx-auto px-5 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <img src="/carziqo.webp" alt="Carziqo.Ltd" className="w-9 h-9 rounded-lg object-cover bg-white" />
+            <img src="/assets/images/waymo-removebg-preview.png" alt="WAYMO" className="w-9 h-9 rounded-lg object-contain bg-white p-1" />
             <div>
-              <h1 className="font-bold text-white text-sm">Carziqo.Ltd</h1>
+              <h1 className="font-bold text-white text-sm">WAYMO</h1>
               <p className="text-[10px] text-gray-400">Welcome, {profile?.full_name || 'User'}</p>
             </div>
           </div>
@@ -63,6 +65,7 @@ export default function UserApp({ onShowAbout }: { onShowAbout: () => void }) {
         {tab === 'home' && <UserDashboard />}
         {tab === 'store' && <CarStore />}
         {tab === 'rentals' && <MyRentals />}
+        {tab === 'history' && <RechargeHistory />}
         {tab === 'rewards' && <Rewards />}
         {tab === 'profile' && <UserProfile />}
       </main>

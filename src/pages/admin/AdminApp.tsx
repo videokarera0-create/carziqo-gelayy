@@ -35,10 +35,10 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
       >
         <div className="p-5 border-b border-[#232a3f]">
           <div className="flex items-center gap-3">
-            <img src="/carziqo.webp" alt="Carziqo.Ltd" className="w-10 h-10 rounded-lg object-cover bg-white" />
+            <img src="/assets/images/waymo-removebg-preview.png" alt="WAYMO" className="w-10 h-10 rounded-lg object-contain bg-white p-1" />
             <div>
-              <h1 className="font-bold text-white text-sm">Admin Panel</h1>
-              <p className="text-[10px] text-gray-400">Carziqo.Ltd</p>
+              <h1 className="font-bold text-white text-sm">WAYMO Admin</h1>
+              <p className="text-[10px] text-gray-400">Wallet Operations</p>
             </div>
           </div>
         </div>
@@ -69,7 +69,7 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all"
           >
             <Info className="w-5 h-5" />
-            About Carziqo
+            About WAYMO
           </button>
           <button
             onClick={signOut}
