@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { ChatMessage } from '@/lib/types';
-import { MessageCircle, X, Send } from 'lucide-react';
+import { MessageCircle, X, Send, CircleAlert as AlertCircle } from 'lucide-react';
 
 export default function UserChatWidget() {
   const { session } = useAuth();
@@ -12,8 +12,10 @@ export default function UserChatWidget() {
   const [sending, setSending] = useState(false);
   const [unread, setUnread] = useState(0);
   const [toast, setToast] = useState<ChatMessage | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastToastRef = useRef<string | null>(null);
+  const openRef = useRef(false);
 
   const loadMessages = useCallback(async () => {
     if (!session) return;
@@ -49,11 +51,14 @@ export default function UserChatWidget() {
   }, [session]);
 
   useEffect(() => {
+    openRef.current = open;
+  }, [open]);
+
+  useEffect(() => {
     if (!open || !session) return;
     loadMessages();
   }, [open, session, loadMessages]);
 
-  // Always-on realtime subscription — even when chat is closed
   useEffect(() => {
     if (!session) return;
     loadUnreadOnly();
@@ -65,7 +70,7 @@ export default function UserChatWidget() {
         (payload) => {
           const newMsg = payload.new as unknown as ChatMessage;
           if (newMsg.sender_role === 'admin') {
-            if (open) {
+            if (openRef.current) {
               loadMessages();
             } else {
               setUnread((prev) => prev + 1);
@@ -75,14 +80,14 @@ export default function UserChatWidget() {
                 setTimeout(() => setToast(null), 6000);
               }
             }
-          } else if (open) {
+          } else if (openRef.current) {
             loadMessages();
           }
         }
       )
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [session, open, loadMessages, loadUnreadOnly]);
+  }, [session, loadMessages, loadUnreadOnly]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -93,16 +98,21 @@ export default function UserChatWidget() {
   async function handleSend() {
     if (!session || !input.trim()) return;
     setSending(true);
+    setError(null);
     const content = input.trim();
     setInput('');
-    const { error } = await supabase.from('chat_messages').insert({
+    const { error: insErr } = await supabase.from('chat_messages').insert({
       user_id: session.user.id,
       sender_id: session.user.id,
       sender_role: 'user',
       content,
     });
-    if (error) {
+    if (insErr) {
+      console.error('user chat send failed', insErr);
+      setError('Could not send message: ' + insErr.message);
       setInput(content);
+    } else {
+      loadMessages();
     }
     setSending(false);
   }
@@ -110,6 +120,7 @@ export default function UserChatWidget() {
   function openChat() {
     setOpen(true);
     setToast(null);
+    setError(null);
   }
 
   return (
@@ -171,11 +182,16 @@ export default function UserChatWidget() {
 
           {/* Messages */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
-            {messages.length === 0 && (
+            {messages.length === 0 && !error && (
               <div className="text-center py-8">
                 <MessageCircle className="w-10 h-10 text-gray-600 mx-auto mb-2" />
                 <p className="text-gray-500 text-sm">Start a conversation with our support team</p>
                 <p className="text-gray-600 text-xs mt-1">We typically reply within minutes</p>
+              </div>
+            )}
+            {error && (
+              <div className="flex items-start gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" /> {error}
               </div>
             )}
             {messages.map((msg) => {

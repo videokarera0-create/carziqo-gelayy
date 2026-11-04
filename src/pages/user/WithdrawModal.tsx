@@ -87,7 +87,7 @@ export default function WithdrawModal({ balance, onClose, onSuccess }: { balance
       return;
     }
     if (!eligible) {
-      setError(`This withdrawal needs ${requiredReferrals} qualified referral${requiredReferrals > 1 ? 's' : ''} who each invested at least ₱500.`);
+      setError(`This withdrawal needs ${requiredReferrals} qualified referral${requiredReferrals > 1 ? 's' : ''} who each recharged at least ₱500.`);
       return;
     }
     if (amt <= 0) {
@@ -166,7 +166,7 @@ export default function WithdrawModal({ balance, onClose, onSuccess }: { balance
             {eligibilityLoading ? 'Checking withdrawal eligibility...' : eligible ? 'Withdrawal eligibility confirmed' : 'Withdrawal locked until you qualify'}
           </p>
           <p className="text-gray-400 text-xs mt-1">
-            {eligible ? 'You have enough qualified referrals.' : `Invite ${requiredReferrals} user${requiredReferrals > 1 ? 's' : ''} who each rent a car for at least ₱500 (${qualifiedReferrals}/${requiredReferrals}).`} Minimum withdrawal: ₱500
+            {eligible ? 'You have enough qualified referrals.' : `Invite ${requiredReferrals} user${requiredReferrals > 1 ? 's' : ''} who each recharge at least ₱500 (${qualifiedReferrals}/${requiredReferrals}).`} Minimum withdrawal: ₱500
           </p>
         </div>
 

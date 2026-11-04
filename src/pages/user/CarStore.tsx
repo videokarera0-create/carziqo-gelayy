@@ -109,8 +109,8 @@ function InvestmentModal({ car, onClose }: { car: CarType; onClose: () => void }
   const totalReturn = dailyPayout * duration;
   const balance = profile?.wallet_balance || 0;
   const canAfford = isFreeCar || invAmount <= balance;
-  const MIN_INVESTMENT = 500;
-  const MAX_INVESTMENT = 100000;
+  const MIN_INVESTMENT = 300;
+  const MAX_INVESTMENT = 75000;
   const withinLimits = invAmount >= MIN_INVESTMENT && invAmount <= MAX_INVESTMENT;
 
   async function handleInvest() {
