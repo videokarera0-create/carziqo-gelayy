@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { formatCurrency } from '@/lib/types';
-import { CircleArrowDown as ArrowDownCircle, CircleArrowUp as ArrowUpCircle, Briefcase, Wallet, TrendingUp, ChevronRight, BarChart3, CalendarDays, Percent } from 'lucide-react';
+import { CircleArrowDown as ArrowDownCircle, CircleArrowUp as ArrowUpCircle, Briefcase, Wallet, TrendingUp, ChevronRight, BarChart3, CalendarDays, Percent, QrCode } from 'lucide-react';
 
 interface AdminTab {
-  id: 'recharges' | 'withdrawals' | 'cars' | 'users';
+  id: 'recharges' | 'withdrawals' | 'cars' | 'users' | 'payments';
   label: string;
   icon: React.ReactNode;
 }
@@ -72,6 +72,7 @@ export default function AdminDashboard({ onNavigate }: { onNavigate: (tab: Admin
     { id: 'withdrawals', label: 'Pending Withdrawals', icon: <ArrowUpCircle className="w-5 h-5" /> },
     { id: 'cars', label: 'Manage Cars', icon: <Briefcase className="w-5 h-5" /> },
     { id: 'users', label: 'User Activity Logs', icon: <Wallet className="w-5 h-5" /> },
+    { id: 'payments', label: 'Payment QR Codes', icon: <QrCode className="w-5 h-5" /> },
   ];
 
   const analytics = analyticsView === 'daily' ? dailyAnalytics : weeklyAnalytics;

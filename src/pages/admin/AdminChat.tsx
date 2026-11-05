@@ -175,7 +175,7 @@ export default function AdminChat() {
         </div>
       )}
 
-      <div className="bg-[#131825]/80 backdrop-blur-xl rounded-2xl border border-[#232a3f] overflow-hidden shadow-2xl shadow-black/20" style={{ height: 'calc(100vh - 340px)', minHeight: '420px' }}>
+      <div className="bg-[#131825]/80 backdrop-blur-xl rounded-2xl border border-[#232a3f] overflow-hidden shadow-2xl shadow-black/20 h-[calc(100vh-340px)] min-h-[420px] max-h-[700px]">
         <div className="flex h-full">
           {/* Conversation list */}
           <div className={`${activeUser ? 'hidden sm:flex' : 'flex'} flex-col w-full sm:w-80 border-r border-[#232a3f]`}>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import AdminNotifications from '@/components/AdminNotifications';
-import { LayoutDashboard, Car, CircleArrowDown as ArrowDownCircle, CircleArrowUp as ArrowUpCircle, Users, LogOut, Menu, X, Info, Route, MessageCircle } from 'lucide-react';
+import { LayoutDashboard, Car, CircleArrowDown as ArrowDownCircle, CircleArrowUp as ArrowUpCircle, Users, LogOut, Menu, Info, Route, MessageCircle, QrCode } from 'lucide-react';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminRecharges from '@/pages/admin/AdminRecharges';
 import AdminWithdrawals from '@/pages/admin/AdminWithdrawals';
@@ -9,10 +9,11 @@ import AdminCars from '@/pages/admin/AdminCars';
 import AdminUsers from '@/pages/admin/AdminUsers';
 import AdminRoutes from '@/pages/admin/AdminRoutes';
 import AdminChat from '@/pages/admin/AdminChat';
+import AdminPaymentMethods from '@/pages/admin/AdminPaymentMethods';
 import { supabase } from '@/lib/supabase';
 import { useAccentColor } from '@/lib/useAccentColor';
 
-type AdminTab = 'dashboard' | 'recharges' | 'withdrawals' | 'cars' | 'routes' | 'users' | 'chat';
+type AdminTab = 'dashboard' | 'recharges' | 'withdrawals' | 'cars' | 'routes' | 'users' | 'chat' | 'payments';
 
 export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
   const { signOut } = useAuth();
@@ -54,6 +55,7 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
     { id: 'routes', label: 'Fleet Routes', icon: <Route className="w-5 h-5" /> },
     { id: 'users', label: 'User Logs', icon: <Users className="w-5 h-5" /> },
     { id: 'chat', label: 'Live Chat', icon: <MessageCircle className="w-5 h-5" />, badge: chatUnread },
+    { id: 'payments', label: 'Payment QR Codes', icon: <QrCode className="w-5 h-5" /> },
   ];
 
   return (
@@ -142,6 +144,7 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
           {tab === 'routes' && <AdminRoutes />}
           {tab === 'users' && <AdminUsers />}
           {tab === 'chat' && <AdminChat />}
+          {tab === 'payments' && <AdminPaymentMethods />}
         </main>
       </div>
     </div>
