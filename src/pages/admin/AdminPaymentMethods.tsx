@@ -239,10 +239,22 @@ export default function AdminPaymentMethods() {
 
                   <div className="flex-1 min-w-0 flex flex-col justify-between">
                     <div>
-                      <p className="text-gray-500 text-xs mb-1">Instructions</p>
-                      <p className="text-gray-300 text-xs leading-relaxed line-clamp-4">
-                        {m.instructions || 'No instructions set.'}
-                      </p>
+                      <p className="text-gray-500 text-xs mb-1">Deposit Guide</p>
+                      {m.instructions ? (
+                        <ol className="space-y-1">
+                          {m.instructions.split('\n').filter((s) => s.trim()).slice(0, 4).map((step, i) => (
+                            <li key={i} className="flex items-start gap-1.5 text-xs text-gray-300 leading-relaxed">
+                              <span className="flex-shrink-0 w-4 h-4 rounded-full bg-blue-500/15 text-blue-400 text-[9px] font-bold flex items-center justify-center mt-0.5">{i + 1}</span>
+                              <span className="line-clamp-2">{step.trim()}</span>
+                            </li>
+                          ))}
+                          {m.instructions.split('\n').filter((s) => s.trim()).length > 4 && (
+                            <li className="text-gray-500 text-[10px] pl-5.5">+{(m.instructions.split('\n').filter((s) => s.trim()).length - 4)} more steps</li>
+                          )}
+                        </ol>
+                      ) : (
+                        <p className="text-gray-600 text-xs italic">No steps set.</p>
+                      )}
                     </div>
                     <div className="flex gap-2 mt-2">
                       <button
@@ -305,9 +317,24 @@ function EditModal({
   saving: boolean;
 }) {
   const fieldClass = 'w-full bg-[#0a0e1a] border border-[#232a3f] rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-blue-500 transition-colors';
+
+  const steps = parseSteps(method.instructions);
+  function updateStep(idx: number, value: string) {
+    const newSteps = [...steps];
+    newSteps[idx] = value;
+    onChange({ ...method, instructions: newSteps.filter((s) => s.trim()).join('\n') });
+  }
+  function addStep() {
+    onChange({ ...method, instructions: [...steps, ''].filter((s) => s !== undefined).join('\n') });
+  }
+  function removeStep(idx: number) {
+    const newSteps = steps.filter((_, i) => i !== idx);
+    onChange({ ...method, instructions: newSteps.join('\n') });
+  }
+
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-      <div className="bg-[#131825] rounded-2xl border border-[#232a3f] p-5 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-[#131825] rounded-2xl border border-[#232a3f] p-5 w-full max-w-md max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-white font-semibold">Edit Payment Method</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-white"><X className="w-5 h-5" /></button>
@@ -323,14 +350,33 @@ function EditModal({
             />
           </div>
           <div>
-            <label className="text-sm text-gray-300 mb-1.5 block">Instructions</label>
-            <textarea
-              value={method.instructions || ''}
-              onChange={(e) => onChange({ ...method, instructions: e.target.value })}
-              className={fieldClass}
-              rows={4}
-              placeholder="Payment instructions users will see..."
-            />
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-sm text-gray-300">Step-by-Step Deposit Guide</label>
+              <button onClick={addStep} className="text-blue-400 text-xs font-medium hover:text-blue-300 flex items-center gap-1">
+                <Plus className="w-3 h-3" /> Add step
+              </button>
+            </div>
+            <p className="text-gray-500 text-xs mb-2">Users see these as numbered steps when recharging. Keep each step short and clear.</p>
+            <div className="space-y-2">
+              {steps.map((step, idx) => (
+                <div key={idx} className="flex items-start gap-2">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-500/15 text-blue-400 text-xs font-bold flex items-center justify-center mt-2.5">{idx + 1}</span>
+                  <textarea
+                    value={step}
+                    onChange={(e) => updateStep(idx, e.target.value)}
+                    className={fieldClass}
+                    rows={2}
+                    placeholder={`Step ${idx + 1}: e.g. Open GCash and scan the QR code above`}
+                  />
+                  <button onClick={() => removeStep(idx)} className="flex-shrink-0 text-gray-500 hover:text-red-400 mt-2.5">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+              {steps.length === 0 && (
+                <p className="text-gray-600 text-xs italic py-2">No steps yet. Click "Add step" to create the deposit guide.</p>
+              )}
+            </div>
           </div>
         </div>
         <button
@@ -345,6 +391,11 @@ function EditModal({
   );
 }
 
+function parseSteps(instructions: string | null): string[] {
+  if (!instructions) return [];
+  return instructions.split('\n').map((s) => s.trim()).filter((s) => s.length > 0);
+}
+
 function CreateModal({
   onClose,
   onCreate,
@@ -355,11 +406,22 @@ function CreateModal({
   saving: boolean;
 }) {
   const [name, setName] = useState('');
-  const [instructions, setInstructions] = useState('');
+  const [steps, setSteps] = useState<string[]>(['']);
   const fieldClass = 'w-full bg-[#0a0e1a] border border-[#232a3f] rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-blue-500 transition-colors';
+
+  function updateStep(idx: number, value: string) {
+    setSteps((prev) => prev.map((s, i) => (i === idx ? value : s)));
+  }
+  function addStep() {
+    setSteps((prev) => [...prev, '']);
+  }
+  function removeStep(idx: number) {
+    setSteps((prev) => prev.filter((_, i) => i !== idx));
+  }
+
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-      <div className="bg-[#131825] rounded-2xl border border-[#232a3f] p-5 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-[#131825] rounded-2xl border border-[#232a3f] p-5 w-full max-w-md max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-white font-semibold">Add Payment Method</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-white"><X className="w-5 h-5" /></button>
@@ -376,19 +438,37 @@ function CreateModal({
             />
           </div>
           <div>
-            <label className="text-sm text-gray-300 mb-1.5 block">Instructions (optional)</label>
-            <textarea
-              value={instructions}
-              onChange={(e) => setInstructions(e.target.value)}
-              className={fieldClass}
-              rows={4}
-              placeholder="Payment instructions users will see..."
-            />
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-sm text-gray-300">Step-by-Step Deposit Guide</label>
+              <button onClick={addStep} className="text-blue-400 text-xs font-medium hover:text-blue-300 flex items-center gap-1">
+                <Plus className="w-3 h-3" /> Add step
+              </button>
+            </div>
+            <p className="text-gray-500 text-xs mb-2">Users see these as numbered steps when recharging.</p>
+            <div className="space-y-2">
+              {steps.map((step, idx) => (
+                <div key={idx} className="flex items-start gap-2">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-500/15 text-blue-400 text-xs font-bold flex items-center justify-center mt-2.5">{idx + 1}</span>
+                  <textarea
+                    value={step}
+                    onChange={(e) => updateStep(idx, e.target.value)}
+                    className={fieldClass}
+                    rows={2}
+                    placeholder={`Step ${idx + 1}: e.g. Open the app and scan the QR code`}
+                  />
+                  {steps.length > 1 && (
+                    <button onClick={() => removeStep(idx)} className="flex-shrink-0 text-gray-500 hover:text-red-400 mt-2.5">
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
           <p className="text-gray-500 text-xs">A placeholder QR will be used initially. You can upload the real QR code after creating.</p>
         </div>
         <button
-          onClick={() => onCreate(name.trim(), instructions.trim())}
+          onClick={() => onCreate(name.trim(), steps.filter((s) => s.trim()).join('\n'))}
           disabled={saving || !name.trim()}
           className="w-full gradient-primary text-white font-semibold py-3 rounded-xl transition-all hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
         >

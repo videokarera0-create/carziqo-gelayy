@@ -90,6 +90,10 @@
     animation: pulseSlow 6s ease-in-out infinite;
   }
 
+  .animate-ping-slow {
+    animation: pingSlow 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
   .animate-float {
     animation: floatY 8s ease-in-out infinite;
   }
@@ -247,6 +251,11 @@
 @keyframes pulseSlow {
   0%, 100% { opacity: 0.3; transform: scale(1); }
   50% { opacity: 0.5; transform: scale(1.05); }
+}
+
+@keyframes pingSlow {
+  0% { transform: scale(1); opacity: 1; }
+  75%, 100% { transform: scale(1.8); opacity: 0; }
 }
 
 @keyframes floatY {

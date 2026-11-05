@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import AdminNotifications from '@/components/AdminNotifications';
 import { LayoutDashboard, Car, CircleArrowDown as ArrowDownCircle, CircleArrowUp as ArrowUpCircle, Users, LogOut, Menu, Info, Route, MessageCircle, QrCode } from 'lucide-react';
@@ -20,7 +20,15 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
   const [tab, setTab] = useState<AdminTab>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatUnread, setChatUnread] = useState(0);
+  const [newMessageAlert, setNewMessageAlert] = useState(false);
   const accent = useAccentColor();
+  const prevUnreadRef = useRef(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    audioRef.current = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=');
+    audioRef.current.volume = 0.3;
+  }, []);
 
   useEffect(() => {
     async function loadUnread() {
@@ -29,7 +37,15 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
         .select('*', { count: 'exact', head: true })
         .eq('sender_role', 'user')
         .eq('is_read', false);
-      setChatUnread(count || 0);
+      const newCount = count || 0;
+      setChatUnread(newCount);
+
+      if (newCount > prevUnreadRef.current && tab !== 'chat') {
+        setNewMessageAlert(true);
+        try { audioRef.current?.play(); } catch { /* autoplay blocked */ }
+        setTimeout(() => setNewMessageAlert(false), 8000);
+      }
+      prevUnreadRef.current = newCount;
     }
     loadUnread();
 
@@ -37,7 +53,11 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
       .channel('admin-chat-badge')
       .on('postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'chat_messages' },
-        () => loadUnread()
+        (payload) => {
+          if (payload.new && (payload.new as { sender_role: string }).sender_role === 'user') {
+            loadUnread();
+          }
+        }
       )
       .on('postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'chat_messages' },
@@ -45,7 +65,7 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
       )
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [tab]);
 
   const navItems: { id: AdminTab; label: string; icon: React.ReactNode; badge?: number }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
@@ -54,7 +74,7 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
     { id: 'cars', label: 'Car Management', icon: <Car className="w-5 h-5" /> },
     { id: 'routes', label: 'Fleet Routes', icon: <Route className="w-5 h-5" /> },
     { id: 'users', label: 'User Logs', icon: <Users className="w-5 h-5" /> },
-    { id: 'chat', label: 'Live Chat', icon: <MessageCircle className="w-5 h-5" />, badge: chatUnread },
+    { id: 'chat', label: 'Live Chat', icon: <MessageCircle className={`w-5 h-5 ${newMessageAlert && tab !== 'chat' ? 'animate-bounce' : ''}`} />, badge: chatUnread },
     { id: 'payments', label: 'Payment QR Codes', icon: <QrCode className="w-5 h-5" /> },
   ];
 
@@ -84,6 +104,7 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
               onClick={() => {
                 setTab(item.id);
                 setSidebarOpen(false);
+                if (item.id === 'chat') setNewMessageAlert(false);
               }}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
               style={tab === item.id ? { background: `linear-gradient(135deg, ${accent}, ${accent}cc)`, color: '#fff', boxShadow: `0 4px 12px ${accent}40` } : undefined}
@@ -91,7 +112,9 @@ export default function AdminApp({ onShowAbout }: { onShowAbout: () => void }) {
               {item.icon}
               {item.label}
               {!!item.badge && item.badge > 0 && (
-                <span className="ml-auto min-w-5 h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                <span className={`ml-auto min-w-5 h-5 px-1.5 rounded-full text-white text-[10px] font-bold flex items-center justify-center ${
+                  item.id === 'chat' && newMessageAlert ? 'bg-red-500 animate-ping-slow' : 'bg-red-500'
+                }`}>
                   {item.badge > 9 ? '9+' : item.badge}
                 </span>
               )}

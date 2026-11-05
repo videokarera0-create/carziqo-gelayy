@@ -279,10 +279,19 @@ export default function RechargeModal({ onClose, onSuccess }: { onClose: () => v
               <p className="text-gray-700 text-sm font-semibold mt-3">{selectedMethod.method_name}</p>
               <p className="text-gray-500 text-xs mt-1">Payment amount: {formatCurrency(parseFloat(amount))}</p>
             </div>
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl px-4 py-3 mb-4">
-              <p className="text-blue-300 text-xs font-semibold mb-1">Before you send</p>
-              <p className="text-gray-300 text-xs leading-relaxed">{selectedMethod.instructions}</p>
-            </div>
+            {selectedMethod.instructions && (
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl px-4 py-3 mb-4">
+                <p className="text-blue-300 text-xs font-semibold mb-2">Step-by-step deposit guide</p>
+                <ol className="space-y-2">
+                  {selectedMethod.instructions.split('\n').filter((s) => s.trim()).map((step, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-bold flex items-center justify-center mt-0.5">{i + 1}</span>
+                      <span className="text-gray-300 text-xs leading-relaxed">{step.trim()}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
 
             {/* Reference number */}
             <label className="text-sm font-medium text-gray-300 mb-2 block">Transaction Reference Number</label>
