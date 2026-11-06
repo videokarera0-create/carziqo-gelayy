@@ -2,7 +2,80 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { ChatMessage } from '@/lib/types';
-import { MessageCircle, X, Send, CircleAlert as AlertCircle } from 'lucide-react';
+import { MessageCircle, X, Send, CircleAlert as AlertCircle, Bot } from 'lucide-react';
+
+interface BotReply {
+  keywords: string[];
+  reply: string;
+}
+
+const BOT_REPLIES: BotReply[] = [
+  {
+    keywords: ['recharge', 'deposit', 'top up', 'add money', 'load', 'payment', 'pay', 'gcash', 'maya', 'usdt', 'crypto', 'bank'],
+    reply: 'To recharge your wallet:\n1. Tap the wallet icon on your dashboard\n2. Enter the amount you want to deposit\n3. Choose a payment method (GCash, Maya, Bank Transfer, or USDT)\n4. Scan the QR code and send the exact amount\n5. Upload a screenshot of your payment receipt\n6. Wait for admin approval — your balance updates automatically once approved\n\nRecharges are usually approved within minutes. Is there anything else?',
+  },
+  {
+    keywords: ['withdraw', 'cash out', 'payout', 'withdrawal', 'transfer out'],
+    reply: 'To withdraw your earnings:\n1. Go to your dashboard and tap "Withdraw"\n2. Enter the amount (minimum is ₱500)\n3. Select your withdrawal method (GCash, PayMaya, Bank, or Crypto)\n4. Make sure you have at least one qualified referral with an active rental of ₱500+\n5. Submit and wait for admin review\n\nWithdrawal fees depend on your tier. The more qualified referrals you have, the higher your tier.',
+  },
+  {
+    keywords: ['rental', 'invest', 'car', 'how to invest', 'buy car', 'earn', 'daily', 'return', 'profit'],
+    reply: 'To start earning with WAYMO:\n1. Browse available cars in the Car Store\n2. Each car shows its price and daily return rate\n3. Purchase a car to start a rental contract\n4. You earn daily payouts automatically — no action needed\n5. Track your earnings in "My Rentals"\n\nEvery new user gets a FREE starter car (Toyota Corolla) for 15 days. You keep all earnings from it!',
+  },
+  {
+    keywords: ['referral', 'refer', 'invite', 'friend', 'referral code', 'bonus'],
+    reply: 'Referral program:\n• Share your referral code with friends\n• When they sign up using your code, you earn 0.5% bonus on every recharge they make\n• Qualified referrals (friends with approved recharges of ₱500+) unlock withdrawals\n• More qualified referrals = higher VIP level and lower withdrawal requirements\n\nFind your referral code in your profile or the Rewards page.',
+  },
+  {
+    keywords: ['vip', 'level', 'tier', 'rank', 'status'],
+    reply: 'VIP Levels are based on your referrals and investments:\n• More active referrals = higher referral VIP level\n• Higher investment totals = higher investment VIP level\n• Your VIP level is the higher of the two\n\nVIP levels unlock benefits and reduce withdrawal requirements. Check your current level in your profile.',
+  },
+  {
+    keywords: ['checkin', 'check in', 'daily reward', 'free reward', 'bonus', 'carbon', 'points'],
+    reply: 'Daily Check-in:\n• Visit the Rewards page daily to check in\n• Each check-in gives you cash rewards and carbon points\n• Carbon points can be exchanged for coupons and gifts\n\nYou also earn carbon points by playing the Bubble Game in the Rewards section!',
+  },
+  {
+    keywords: ['bubble', 'game', 'play', 'fun'],
+    reply: 'Bubble Game:\n• Find it in the Rewards page\n• Pop bubbles to earn carbon points\n• Use carbon points to claim coupons and redeem gifts\n\nIt\'s a fun way to earn extra rewards every day!',
+  },
+  {
+    keywords: ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening', 'greetings'],
+    reply: 'Hello! Welcome to WAYMO Support. I\'m your AI assistant and I can help with:\n• Recharges and payments\n• Withdrawals\n• Car rentals and earnings\n• Referrals and VIP levels\n• Daily rewards and games\n\nType your question or say "talk to agent" to reach a human support team member.',
+  },
+  {
+    keywords: ['thank', 'thanks', 'thank you', 'salamat', 'ty'],
+    reply: 'You\'re welcome! If you have any other questions, feel free to ask. I\'m here to help 24/7. 😊',
+  },
+  {
+    keywords: ['agent', 'human', 'admin', 'real person', 'operator', 'talk to', 'support team', 'representative'],
+    reply: 'I\'m connecting you with a human support agent. Please send your message and our team will respond shortly. You can also continue chatting with me for instant answers anytime!',
+  },
+  {
+    keywords: ['problem', 'issue', 'bug', 'error', 'broken', 'not working', 'cant', "can't", 'stuck', 'fail'],
+    reply: 'I\'m sorry you\'re experiencing an issue. For technical problems, please describe what happened in detail and our support team will investigate. You can also try:\n• Refreshing the page\n• Checking your internet connection\n• Clearing your browser cache\n\nIf the issue persists, say "talk to agent" to reach our team directly.',
+  },
+  {
+    keywords: ['password', 'forgot', 'reset', 'login', 'account', 'sign in', 'cant login', 'locked out'],
+    reply: 'Account help:\n• If you forgot your password, use the "Forgot password" option on the login screen\n• Make sure you\'re using the correct email address\n• If you\'re still locked out, say "talk to agent" and our team will help you recover your account',
+  },
+  {
+    keywords: ['how', 'what is', 'what are', 'explain', 'guide', 'tutorial', 'start', 'begin', 'new'],
+    reply: 'Welcome to WAYMO! Here\'s how to get started:\n1. Recharge your wallet to fund your account\n2. Browse the Car Store and invest in a car\n3. Earn daily payouts automatically\n4. Refer friends to earn bonuses and unlock withdrawals\n5. Withdraw your earnings once you meet the requirements\n\nEvery new user gets a FREE starter car for 15 days. What would you like to know more about?',
+  },
+];
+
+function findBotReply(message: string): { reply: string; isHandoff: boolean } | null {
+  const lower = message.toLowerCase();
+  const handoffKeywords = ['agent', 'human', 'admin', 'real person', 'operator', 'talk to', 'support team', 'representative'];
+  const isHandoff = handoffKeywords.some((k) => lower.includes(k));
+
+  for (const bot of BOT_REPLIES) {
+    if (bot.keywords.some((k) => lower.includes(k))) {
+      return { reply: bot.reply, isHandoff };
+    }
+  }
+  return null;
+}
 
 export default function UserChatWidget() {
   const { session } = useAuth();
@@ -10,6 +83,8 @@ export default function UserChatWidget() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
+  const [botThinking, setBotThinking] = useState(false);
+  const [botEnabled, setBotEnabled] = useState(true);
   const [unread, setUnread] = useState(0);
   const [toast, setToast] = useState<ChatMessage | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +103,8 @@ export default function UserChatWidget() {
     setMessages(msgs);
     const unreadAdmin = msgs.filter((m) => m.sender_role === 'admin' && !m.is_read);
     setUnread(unreadAdmin.length);
+    // Auto-disable bot once a real admin has replied, so the conversation is human-only after that.
+    if (msgs.some((m) => m.sender_role === 'admin')) setBotEnabled(false);
 
     if (unreadAdmin.length > 0) {
       const unreadIds = unreadAdmin.map((m) => m.id);
@@ -111,10 +188,52 @@ export default function UserChatWidget() {
       console.error('user chat send failed', insErr);
       setError('Could not send message: ' + insErr.message);
       setInput(content);
-    } else {
-      loadMessages();
+      setSending(false);
+      return;
     }
+    loadMessages();
     setSending(false);
+
+    // AI assistant: try to answer common questions instantly.
+    // If an admin has already joined the conversation, skip the bot.
+    if (botEnabled) {
+      const match = findBotReply(content);
+      if (match) {
+        setBotThinking(true);
+        // Small delay so the "typing" indicator feels natural.
+        await new Promise((r) => setTimeout(r, 900));
+        const { error: botErr } = await supabase.from('chat_messages').insert({
+          user_id: session.user.id,
+          sender_id: session.user.id,
+          sender_role: 'bot',
+          content: match.reply,
+          is_read: true,
+        });
+        setBotThinking(false);
+        if (botErr) {
+          console.error('bot reply insert failed', botErr);
+        } else {
+          loadMessages();
+        }
+      } else {
+        // No keyword match — nudge the user that a human will respond.
+        setBotThinking(true);
+        await new Promise((r) => setTimeout(r, 700));
+        const { error: botErr } = await supabase.from('chat_messages').insert({
+          user_id: session.user.id,
+          sender_id: session.user.id,
+          sender_role: 'bot',
+          content: "I couldn't find a quick answer for that. I've notified our support team — a human agent will reply shortly. You can also try asking about: recharge, withdrawal, rentals, referrals, or VIP levels.",
+          is_read: true,
+        });
+        setBotThinking(false);
+        if (botErr) {
+          console.error('bot fallback insert failed', botErr);
+        } else {
+          loadMessages();
+        }
+      }
+    }
   }
 
   function openChat() {
@@ -196,15 +315,24 @@ export default function UserChatWidget() {
             )}
             {messages.map((msg) => {
               const isMe = msg.sender_role === 'user';
+              const isBot = msg.sender_role === 'bot';
               return (
-                <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} animate-fade-in`}>
                   <div
-                    className={`max-w-[75%] rounded-2xl px-3.5 py-2.5 text-sm ${
+                    className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm ${
                       isMe
                         ? 'gradient-primary text-white rounded-br-sm'
-                        : 'bg-[#0a0e1a] border border-[#232a3f] text-gray-200 rounded-bl-sm'
+                        : isBot
+                          ? 'bg-emerald-500/10 border border-emerald-500/30 text-gray-100 rounded-bl-sm'
+                          : 'bg-[#0a0e1a] border border-[#232a3f] text-gray-200 rounded-bl-sm'
                     }`}
                   >
+                    {isBot && (
+                      <div className="flex items-center gap-1.5 mb-1.5 pb-1.5 border-b border-emerald-500/20">
+                        <Bot className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="text-[10px] font-semibold text-emerald-400 uppercase tracking-wide">AI Assistant</span>
+                      </div>
+                    )}
                     <p className="leading-relaxed whitespace-pre-wrap break-words">{msg.content}</p>
                     <p className={`text-[9px] mt-1 ${isMe ? 'text-blue-100/70' : 'text-gray-500'}`}>
                       {new Date(msg.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
@@ -213,6 +341,20 @@ export default function UserChatWidget() {
                 </div>
               );
             })}
+            {botThinking && (
+              <div className="flex justify-start animate-fade-in">
+                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl rounded-bl-sm px-3.5 py-2.5">
+                  <div className="flex items-center gap-1.5">
+                    <Bot className="w-3.5 h-3.5 text-emerald-400" />
+                    <div className="flex gap-1">
+                      <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Input */}

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { ChatMessage, Profile, formatDateShort } from '@/lib/types';
-import { MessageCircle, Send, ChevronLeft, Search, CircleAlert as AlertCircle } from 'lucide-react';
+import { MessageCircle, Send, ChevronLeft, Search, CircleAlert as AlertCircle, Bot } from 'lucide-react';
 
 interface Conversation {
   user: Profile;
@@ -34,11 +34,16 @@ export default function AdminChat() {
   const activeUserRef = useRef<Profile | null>(null);
 
   const loadConversations = useCallback(async () => {
-    const { data: msgData } = await supabase
+    const { data: msgData, error: msgErr } = await supabase
       .from('chat_messages')
       .select('*')
       .order('created_at', { ascending: false });
-    const allMsgs = (data as unknown as ChatMessage[]) || [];
+    if (msgErr) {
+      console.error('admin chat load conversations failed', msgErr);
+      setLoading(false);
+      return;
+    }
+    const allMsgs = (msgData as unknown as ChatMessage[]) || [];
 
     const userIds = [...new Set(allMsgs.map((m) => m.user_id))];
     if (userIds.length === 0) {
@@ -71,21 +76,23 @@ export default function AdminChat() {
   }, []);
 
   const loadMessages = useCallback(async (userId: string) => {
-    const { data } = await supabase
+    const { data, error: loadErr } = await supabase
       .from('chat_messages')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: true });
+    if (loadErr) {
+      console.error('admin chat load messages failed', loadErr);
+      return;
+    }
     const msgs = (data as unknown as ChatMessage[]) || [];
     setMessages(msgs);
 
     const unreadIds = msgs.filter((m) => m.sender_role === 'user' && !m.is_read).map((m) => m.id);
     if (unreadIds.length > 0) {
-      supabase.from('chat_messages').update({ is_read: true }).in('id', unreadIds).then(() => {
-        loadConversations();
-      });
+      await supabase.from('chat_messages').update({ is_read: true }).in('id', unreadIds);
     }
-  }, [loadConversations]);
+  }, []);
 
   useEffect(() => {
     loadConversations();
@@ -97,18 +104,40 @@ export default function AdminChat() {
   }, [activeUser]);
 
   useEffect(() => {
+    let reloadTimer: ReturnType<typeof setTimeout> | null = null;
+    const debouncedReload = () => {
+      if (reloadTimer) clearTimeout(reloadTimer);
+      reloadTimer = setTimeout(() => {
+        loadConversations();
+        const current = activeUserRef.current;
+        if (current) loadMessages(current.id);
+      }, 500);
+    };
     const channel = supabase
       .channel('admin-chat-realtime')
       .on('postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'chat_messages' },
+        (payload) => {
+          const newMsg = payload.new as { sender_role: string };
+          if (newMsg.sender_role === 'user') {
+            debouncedReload();
+          } else {
+            loadConversations();
+          }
+        }
+      )
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'chat_messages' },
         () => {
-          loadConversations();
-          const current = activeUserRef.current;
-          if (current) loadMessages(current.id);
+          if (reloadTimer) clearTimeout(reloadTimer);
+          reloadTimer = setTimeout(() => loadConversations(), 500);
         }
       )
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      if (reloadTimer) clearTimeout(reloadTimer);
+      supabase.removeChannel(channel);
+    };
   }, [loadConversations, loadMessages]);
 
   useEffect(() => {
@@ -270,15 +299,24 @@ export default function AdminChat() {
                 )}
                 {messages.map((msg) => {
                   const isMe = msg.sender_role === 'admin';
+                  const isBot = msg.sender_role === 'bot';
                   return (
                     <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} animate-fade-in`}>
                       <div
                         className={`max-w-[70%] rounded-2xl px-3.5 py-2.5 text-sm ${
                           isMe
                             ? 'gradient-primary text-white rounded-br-sm shadow-lg shadow-blue-500/20'
-                            : 'bg-[#0a0e1a] border border-[#232a3f] text-gray-200 rounded-bl-sm'
+                            : isBot
+                              ? 'bg-emerald-500/10 border border-emerald-500/30 text-gray-100 rounded-bl-sm'
+                              : 'bg-[#0a0e1a] border border-[#232a3f] text-gray-200 rounded-bl-sm'
                         }`}
                       >
+                        {isBot && (
+                          <div className="flex items-center gap-1.5 mb-1.5 pb-1.5 border-b border-emerald-500/20">
+                            <Bot className="w-3.5 h-3.5 text-emerald-400" />
+                            <span className="text-[10px] font-semibold text-emerald-400 uppercase tracking-wide">AI Assistant</span>
+                          </div>
+                        )}
                         <p className="leading-relaxed whitespace-pre-wrap break-words">{msg.content}</p>
                         <p className={`text-[9px] mt-1 ${isMe ? 'text-blue-100/70' : 'text-gray-500'}`}>
                           {new Date(msg.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}

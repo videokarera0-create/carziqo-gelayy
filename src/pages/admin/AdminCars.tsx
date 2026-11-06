@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Car as CarType, formatCurrency } from '@/lib/types';
-import { Plus, CreditCard as Edit, Trash2, X, TrendingUp, Car as CarIcon, Check, Gift } from 'lucide-react';
+import { Plus, CreditCard as Edit, Trash2, X, TrendingUp, Car as CarIcon, Check, Gift, Upload, Loader2 } from 'lucide-react';
 
 export default function AdminCars() {
   const [cars, setCars] = useState<CarType[]>([]);
@@ -131,7 +131,26 @@ function CarFormModal({ car, onClose, onSaved }: { car: CarType | null; onClose:
   const [status, setStatus] = useState(car?.status || 'active');
   const [isFree, setIsFree] = useState(car?.is_free || false);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+    setError(null);
+    if (!file.type.startsWith('image/')) { setError('Please upload an image file.'); return; }
+    if (file.size > 5 * 1024 * 1024) { setError('Image must be smaller than 5 MB.'); return; }
+    setUploading(true);
+    const ext = file.type.split('/')[1] || 'jpg';
+    const fileName = `car-${Date.now()}.${ext}`;
+    const { error: upErr } = await supabase.storage.from('car-images').upload(fileName, file, { contentType: file.type, cacheControl: '3600' });
+    if (upErr) { setError('Upload failed. Please try again.'); setUploading(false); return; }
+    const { data } = supabase.storage.from('car-images').getPublicUrl(fileName);
+    setImageUrl(data.publicUrl);
+    setUploading(false);
+  }
 
   async function handleSave() {
     setError(null);
@@ -190,15 +209,31 @@ function CarFormModal({ car, onClose, onSaved }: { car: CarType | null; onClose:
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Image URL</label>
-            <input
-              type="url"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              className="form-input"
-              placeholder="https://..."
-            />
-            {imageUrl && <img src={imageUrl} alt="Preview" className="mt-2 w-full h-32 rounded-lg object-cover" />}
+            <label className="block text-sm font-medium text-gray-300 mb-2">Car Image</label>
+            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
+            {imageUrl ? (
+              <div className="relative rounded-xl overflow-hidden border border-[#232a3f] mb-2">
+                <img src={imageUrl} alt="Preview" className="w-full h-36 object-cover" />
+                <button
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading}
+                  className="absolute bottom-2 right-2 bg-black/70 text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:bg-black/90 transition-all flex items-center gap-1.5"
+                >
+                  {uploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
+                  {uploading ? 'Uploading...' : 'Replace'}
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="w-full flex flex-col items-center justify-center h-36 border-2 border-dashed border-[#232a3f] rounded-xl cursor-pointer hover:border-blue-500/40 transition-all bg-[#0a0e1a] disabled:opacity-50"
+              >
+                {uploading ? <Loader2 className="w-6 h-6 text-blue-500 animate-spin mb-2" /> : <Upload className="w-6 h-6 text-gray-500 mb-2" />}
+                <span className="text-gray-500 text-sm">{uploading ? 'Uploading...' : 'Click to upload car image'}</span>
+              </button>
+            )}
+            <p className="text-gray-500 text-xs mt-1">JPG, PNG, or WEBP up to 5 MB.</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
