@@ -159,7 +159,7 @@ export default function RechargeModal({ onClose, onSuccess }: { onClose: () => v
         {/* Step 1: Amount */}
         {step === 'amount' && (
           <div className="animate-fade-in">
-            <label className="text-sm font-medium text-gray-300 mb-2 block">Enter Amount (₱,$,€)</label>
+            <label className="text-sm font-medium text-gray-300 mb-2 block">Enter Amount (₱ $ €)</label>
             <input
               ref={amountInputRef}
               type="number"
@@ -186,7 +186,7 @@ export default function RechargeModal({ onClose, onSuccess }: { onClose: () => v
                           : 'border-[#232a3f] bg-[#0a0e1a] text-gray-400 hover:border-blue-500/40 hover:text-white'
                       }`}
                     >
-                      ₱,$,€{amt.toLocaleString()}
+                      ₱ $ € {amt.toLocaleString()}
                     </button>
                   );
                 })}
