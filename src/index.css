@@ -300,6 +300,47 @@
   animation: avatarPulse 2.5s ease-in-out infinite;
 }
 
+/* ===== Fleet map: stop markers & passenger effects ===== */
+.fleet-stop-icon { pointer-events: none; }
+.fleet-stop-marker { position: relative; width: 0; height: 0; }
+.fleet-stop-dot {
+  position: absolute; left: 0; top: 0;
+  width: 8px; height: 8px; margin: -4px 0 0 -4px;
+  border-radius: 50%; background: #60a5fa; border: 1.5px solid #0a0e1a; z-index: 2;
+}
+.fleet-stop-ring {
+  position: absolute; left: 0; top: 0;
+  width: 8px; height: 8px; margin: -4px 0 0 -4px;
+  border-radius: 50%; border: 1.5px solid rgba(96, 165, 250, 0.6);
+  animation: fleetStopRing 2.5s ease-out infinite;
+}
+.fleet-stop-label {
+  position: absolute; left: 8px; top: -8px;
+  white-space: nowrap; font-size: 8px; font-weight: 600;
+  color: #93a4c4; background: rgba(10, 14, 26, 0.8);
+  padding: 1px 4px; border-radius: 3px; opacity: 0;
+  transition: opacity 0.2s; pointer-events: none;
+}
+@keyframes fleetStopRing {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(3.5); opacity: 0; }
+}
+.fleet-car-bob { animation: fleetCarBob 0.8s ease-in-out infinite; }
+@keyframes fleetCarBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+.fleet-stop-pulse {
+  position: absolute; left: 0; top: 0;
+  width: 20px; height: 20px; margin: -10px 0 0 -10px;
+  border-radius: 50%; border: 2px solid rgba(96, 165, 250, 0.7);
+  animation: fleetCarPulse 1.5s ease-out infinite; pointer-events: none;
+}
+@keyframes fleetCarPulse {
+  0% { transform: scale(0.5); opacity: 0.8; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;

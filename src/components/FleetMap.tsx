@@ -13,6 +13,7 @@ import {
   loadActiveRoutes,
   loadRouteLeg,
   routeFor,
+  CarStatus,
 } from '@/lib/fleetRoutes';
 
 const CALIFORNIA_CENTER: Coord = [36.8, -119.5];
@@ -28,22 +29,51 @@ function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (char) => HTML_ESCAPES[char]);
 }
 
-function markerHtml(car: FleetCar, earnings: number): string {
+const STATUS_LABELS: Record<CarStatus, string> = {
+  cruising: 'Cruising',
+  approaching_stop: 'Approaching stop',
+  picking_up: 'Picking up passenger',
+  dropping_off: 'Dropping off passenger',
+  departing: 'Departing',
+};
+
+const STATUS_COLORS: Record<CarStatus, string> = {
+  cruising: '#34d399',
+  approaching_stop: '#fbbf24',
+  picking_up: '#60a5fa',
+  dropping_off: '#a78bfa',
+  departing: '#34d399',
+};
+
+function markerHtml(car: FleetCar, earnings: number, status: CarStatus, speed: number): string {
+  const color = STATUS_COLORS[status];
+  const statusLabel = STATUS_LABELS[status];
+  const isStopped = status === 'picking_up' || status === 'dropping_off';
   return `<div class="relative">
     <div class="absolute left-0 top-0 -translate-x-1/2 -translate-y-1/2">
-      <div data-role="car" class="flex h-5 w-5 items-center justify-center drop-shadow-[0_0_4px_rgba(52,211,153,0.9)]">
+      <div data-role="car" class="flex h-5 w-5 items-center justify-center drop-shadow-[0_0_4px_rgba(52,211,153,0.9)] ${isStopped ? 'fleet-car-bob' : ''}">
         <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">
-          <rect x="5" y="2" width="10" height="16" rx="3.5" fill="#34d399" stroke="#0a0e1a" stroke-width="1" />
+          <rect x="5" y="2" width="10" height="16" rx="3.5" fill="${color}" stroke="#0a0e1a" stroke-width="1" />
           <rect x="6.5" y="5" width="7" height="4" rx="1" fill="#0a0e1a" opacity="0.75" />
           <rect x="6.5" y="12" width="7" height="2.5" rx="1" fill="#0a0e1a" opacity="0.5" />
         </svg>
       </div>
+      ${isStopped ? '<div data-role="pulse" class="fleet-stop-pulse"></div>' : ''}
     </div>
     <div class="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-emerald-500/40 bg-[#0a0e1a]/90 px-2 py-1 text-center shadow-lg">
       <div class="text-[10px] font-semibold text-gray-200">${escapeHtml(car.name)}</div>
       <div data-role="earn" class="text-[11px] font-bold text-emerald-400">${escapeHtml(formatCurrency(earnings))}</div>
-      <div class="text-[10px] text-gray-400">${Math.round(car.speedMph)} mph</div>
+      <div data-role="status" class="text-[9px] font-medium" style="color:${color}">${statusLabel}</div>
+      <div data-role="speed" class="text-[10px] text-gray-400">${Math.round(speed)} mph</div>
     </div>
+  </div>`;
+}
+
+function stopMarkerHtml(stopName: string): string {
+  return `<div class="fleet-stop-marker">
+    <div class="fleet-stop-dot"></div>
+    <div class="fleet-stop-ring"></div>
+    <div class="fleet-stop-label">${escapeHtml(stopName)}</div>
   </div>`;
 }
 
@@ -56,6 +86,7 @@ export default function FleetMap({ investments }: { investments: Investment[] })
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.LayerGroup | null>(null);
+  const stopLayerRef = useRef<L.LayerGroup | null>(null);
   const markersRef = useRef(new Map<string, L.Marker>());
   const fittedRef = useRef(false);
   const [routes, setRoutes] = useState<FleetRoute[] | null>(null);
@@ -129,6 +160,7 @@ export default function FleetMap({ investments }: { investments: Investment[] })
     if (!containerRef.current) return;
     const map = L.map(containerRef.current, { scrollWheelZoom: false }).setView(CALIFORNIA_CENTER, INITIAL_ZOOM);
     L.tileLayer(TILE_URL, { attribution: TILE_ATTRIBUTION, maxZoom: 19 }).addTo(map);
+    stopLayerRef.current = L.layerGroup().addTo(map);
     layerRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
     const markers = markersRef.current;
@@ -136,24 +168,52 @@ export default function FleetMap({ investments }: { investments: Investment[] })
       map.remove();
       mapRef.current = null;
       layerRef.current = null;
+      stopLayerRef.current = null;
       markers.clear();
       fittedRef.current = false;
     };
   }, []);
 
+  // Draw route polylines and stop markers when cars change.
   useEffect(() => {
     const map = mapRef.current;
     const layer = layerRef.current;
-    if (!map || !layer) return;
+    const stopLayer = stopLayerRef.current;
+    if (!map || !layer || !stopLayer) return;
 
     layer.clearLayers();
+    stopLayer.clearLayers();
     markersRef.current.clear();
+
     const current = Date.now();
+
     cars.forEach((car) => {
-      L.polyline(car.points, { color: '#34d399', weight: 3, opacity: 0.45, dashArray: '6 8' }).addTo(layer);
+      // Route polyline
+      L.polyline(car.points, { color: '#34d399', weight: 3, opacity: 0.35, dashArray: '6 8' }).addTo(layer);
+
+      // Stop markers (pickup/drop-off points)
+      car.stops.forEach((stop) => {
+        L.marker(stop.position, {
+          icon: L.divIcon({
+            className: 'fleet-stop-icon',
+            html: stopMarkerHtml(stop.name),
+            iconSize: [0, 0],
+            iconAnchor: [0, 0],
+          }),
+          interactive: false,
+          keyboard: false,
+        }).addTo(stopLayer);
+      });
+
+      // Car marker
       const state = carStateAt(car, current);
       const marker = L.marker(state.position, {
-        icon: L.divIcon({ className: 'fleet-marker', html: markerHtml(car, liveEarnings(car, current)), iconSize: [0, 0], iconAnchor: [0, 0] }),
+        icon: L.divIcon({
+          className: 'fleet-marker',
+          html: markerHtml(car, liveEarnings(car, current), state.status, state.speedMph),
+          iconSize: [0, 0],
+          iconAnchor: [0, 0],
+        }),
         interactive: false,
         keyboard: false,
       }).addTo(layer);
@@ -167,6 +227,7 @@ export default function FleetMap({ investments }: { investments: Investment[] })
     }
   }, [cars]);
 
+  // Animation loop: update car positions every frame.
   useEffect(() => {
     if (cars.length === 0) return;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -180,6 +241,34 @@ export default function FleetMap({ investments }: { investments: Investment[] })
         const state = carStateAt(car, current);
         marker.setLatLng(state.position);
         applyHeading(marker, state.heading);
+
+        // Update status text and speed dynamically.
+        const el = marker.getElement();
+        if (el) {
+          const statusEl = el.querySelector<HTMLElement>('[data-role="status"]');
+          const speedEl = el.querySelector<HTMLElement>('[data-role="speed"]');
+          const color = STATUS_COLORS[state.status];
+          if (statusEl) {
+            statusEl.textContent = STATUS_LABELS[state.status];
+            statusEl.style.color = color;
+          }
+          if (speedEl) speedEl.textContent = `${Math.round(state.speedMph)} mph`;
+
+          // Toggle stop pulse + bob animation.
+          const carEl = el.querySelector<HTMLElement>('[data-role="car"]');
+          const existingPulse = el.querySelector('[data-role="pulse"]');
+          const isStopped = state.status === 'picking_up' || state.status === 'dropping_off';
+          if (carEl) {
+            carEl.classList.toggle('fleet-car-bob', isStopped);
+            const svgRect = carEl.querySelector('rect');
+            if (svgRect) svgRect.setAttribute('fill', color);
+          }
+          if (isStopped && !existingPulse) {
+            carEl?.insertAdjacentHTML('afterend', '<div data-role="pulse" class="fleet-stop-pulse"></div>');
+          } else if (!isStopped && existingPulse) {
+            existingPulse.remove();
+          }
+        }
       }
       if (!reduceMotion) frame = requestAnimationFrame(tick);
     };
@@ -188,6 +277,7 @@ export default function FleetMap({ investments }: { investments: Investment[] })
     return () => cancelAnimationFrame(frame);
   }, [cars]);
 
+  // Update earnings labels every second.
   useEffect(() => {
     if (cars.length === 0) return;
     const interval = window.setInterval(() => setNow(Date.now()), 1000);
@@ -211,7 +301,15 @@ export default function FleetMap({ investments }: { investments: Investment[] })
           </span>
           <span className="text-white text-sm font-semibold">Live Fleet</span>
         </div>
-        <span className="text-gray-400 text-xs">{investments.length} on the road</span>
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-1 text-gray-400 text-xs">
+            <span className="w-2 h-2 rounded-full bg-blue-400" /> Pickup
+          </span>
+          <span className="flex items-center gap-1 text-gray-400 text-xs">
+            <span className="w-2 h-2 rounded-full bg-violet-400" /> Drop-off
+          </span>
+          <span className="text-gray-400 text-xs">{investments.length} on the road</span>
+        </div>
       </div>
 
       <div className="relative">
@@ -219,7 +317,7 @@ export default function FleetMap({ investments }: { investments: Investment[] })
           ref={containerRef}
           className="h-[320px] sm:h-[400px] w-full bg-[#0a0e1a]"
           role="region"
-          aria-label="Map of California showing rented cars driving on roads"
+          aria-label="Map of California showing rented cars driving on roads with pickup and drop-off stops"
         />
         {statusText && (
           <div className="absolute inset-0 z-[400] flex items-center justify-center bg-[#0a0e1a]/70 text-gray-300 text-sm pointer-events-none">
@@ -230,8 +328,8 @@ export default function FleetMap({ investments }: { investments: Investment[] })
 
       <div className="px-4 py-2.5 border-t border-[#232a3f] text-[11px] text-gray-500">
         {usingApproximateRoutes
-          ? 'Road data is temporarily unavailable, so some cars follow approximate paths. Speeds are shown in mph.'
-          : 'Cars drive real city routes at everyday speeds. Speeds are shown in mph.'}
+          ? 'Road data is temporarily unavailable, so some cars follow approximate paths. Cars make pickup and drop-off stops along their routes. Speeds are shown in mph.'
+          : 'Cars drive real city routes at everyday speeds, making passenger pickup and drop-off stops along the way. Speeds are shown in mph.'}
       </div>
     </div>
   );
