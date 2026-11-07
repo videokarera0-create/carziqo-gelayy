@@ -1,4 +1,5 @@
 import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { LanguageProvider } from '@/context/LanguageContext';
 import AuthPage from '@/pages/AuthPage';
 import AboutPage from '@/pages/AboutPage';
 import UserApp from '@/pages/user/UserApp';
@@ -59,7 +60,9 @@ export default function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <AppContent />
+        <LanguageProvider>
+          <AppContent />
+        </LanguageProvider>
       </AuthProvider>
     </ErrorBoundary>
   );

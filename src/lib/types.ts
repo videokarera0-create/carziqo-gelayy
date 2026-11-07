@@ -13,7 +13,7 @@ export interface Profile {
   free_investment_id: string | null;
   vip_level: number;
   theme_color: 'blue' | 'emerald' | 'amber' | 'rose' | 'violet' | 'cyan';
-  language: 'en' | 'fil';
+  language: 'en' | 'fil' | 'es' | 'fr' | 'ar' | 'pt' | 'hi' | 'zh';
   notif_sound: boolean;
   avatar_frame: 'none' | 'gold' | 'neon' | 'cosmic' | null;
   currency: CurrencyCode;

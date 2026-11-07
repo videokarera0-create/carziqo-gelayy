@@ -1,4 +1,5 @@
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { Car, Chrome as Home, Briefcase, User, LogOut, Gift, Leaf, Info, History, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import UserDashboard from '@/pages/user/UserDashboard';
@@ -14,16 +15,17 @@ type Tab = 'home' | 'store' | 'rentals' | 'history' | 'rewards' | 'profile';
 
 export default function UserApp({ onShowAbout }: { onShowAbout: () => void }) {
   const { profile, signOut } = useAuth();
+  const { t } = useLanguage();
   const [tab, setTab] = useState<Tab>('home');
   const accent = useAccentColor();
 
   const navItems: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: 'home', label: 'Home', icon: <Home className="w-5 h-5" /> },
-    { id: 'store', label: 'Car Store', icon: <Car className="w-5 h-5" /> },
-    { id: 'rentals', label: 'Rentals', icon: <Briefcase className="w-5 h-5" /> },
-    { id: 'history', label: 'History', icon: <History className="w-5 h-5" /> },
-    { id: 'rewards', label: 'Rewards', icon: <Gift className="w-5 h-5" /> },
-    { id: 'profile', label: 'Profile', icon: <User className="w-5 h-5" /> },
+    { id: 'home', label: t('nav.home'), icon: <Home className="w-5 h-5" /> },
+    { id: 'store', label: t('nav.store'), icon: <Car className="w-5 h-5" /> },
+    { id: 'rentals', label: t('nav.rentals'), icon: <Briefcase className="w-5 h-5" /> },
+    { id: 'history', label: t('nav.history'), icon: <History className="w-5 h-5" /> },
+    { id: 'rewards', label: t('nav.rewards'), icon: <Gift className="w-5 h-5" /> },
+    { id: 'profile', label: t('nav.profile'), icon: <User className="w-5 h-5" /> },
   ];
 
   return (
@@ -35,14 +37,14 @@ export default function UserApp({ onShowAbout }: { onShowAbout: () => void }) {
             <img src="/assets/images/waymo-removebg-preview.png" alt="WAYMO" className="w-9 h-9 rounded-lg object-contain bg-white p-1 shadow-lg" style={{ boxShadow: `0 4px 12px ${accent}30` }} />
             <div>
               <h1 className="font-bold text-white text-sm text-gradient-shine">WAYMO</h1>
-              <p className="text-[10px] text-gray-400">Welcome, {profile?.full_name || 'User'}</p>
+              <p className="text-[10px] text-gray-400">{t('common.welcome')}, {profile?.full_name || 'User'}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={onShowAbout}
               className="w-9 h-9 rounded-lg bg-[#131825]/80 backdrop-blur-sm flex items-center justify-center text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all"
-              title="About"
+              title={t('common.about')}
             >
               <Info className="w-4 h-4" />
             </button>
@@ -55,7 +57,7 @@ export default function UserApp({ onShowAbout }: { onShowAbout: () => void }) {
             <button
               onClick={signOut}
               className="w-9 h-9 rounded-lg bg-[#131825]/80 backdrop-blur-sm flex items-center justify-center text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
-              title="Sign out"
+              title={t('common.signOut')}
             >
               <LogOut className="w-4 h-4" />
             </button>

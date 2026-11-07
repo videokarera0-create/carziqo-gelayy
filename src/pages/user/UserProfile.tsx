@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { supabase } from '@/lib/supabase';
 import {
   RechargeLog,
@@ -17,6 +18,7 @@ import {
   CurrencyCode,
   setActiveCurrency,
 } from '@/lib/types';
+import { LANGUAGES } from '@/lib/i18n';
 import { StatusBadge } from '@/pages/user/UserDashboard';
 import ReferralEarnings from '@/components/ReferralEarnings';
 import { User, Mail, Phone, Camera, Key, CircleArrowDown as ArrowDownCircle, CircleArrowUp as ArrowUpCircle, Check, X, Gift, Copy, Wallet, Plus, Trash2, Star, Smartphone, Building2, Bitcoin, CircleAlert as AlertCircle, Loader as Loader2, Crown, Sparkles, Palette, Bell, Globe, Frame, Volume2, VolumeX, Coins } from 'lucide-react';
@@ -37,6 +39,7 @@ const METHOD_COLORS: Record<WithdrawalMethod, string> = {
 
 export default function UserProfile() {
   const { profile, session, refreshProfile, signOut } = useAuth();
+  const { t } = useLanguage();
   const [tab, setTab] = useState<'profile' | 'preferences' | 'wallets' | 'security' | 'referral' | 'history'>('profile');
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [phone, setPhone] = useState(profile?.phone || '');
